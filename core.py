@@ -28,10 +28,14 @@ allowed_channels = ['140225706230677504', '143055883755192321', '128470036980563
 def load_modules():
     global cmd_dict
     global global_cmd_list
+    global rank_dict
     class_list = []
     global_cmd_list = []
     cmd_dict = {}
+    rank_dict = {}
+
     module_list = os.listdir('mods')
+
     for j in module_list:
         if j.endswith('.py'):
             class_list.append(str(j)[0:-3])
@@ -45,25 +49,32 @@ def load_modules():
         cmd_dict[v] = class_cmd_list
         for w in class_cmd_list:
             global_cmd_list.append(w)
+
+    for x in class_list:  # Generate rank requirements. Can only be done per module globally, but we can work around it
+        rank_dict[x] = eval(x + '.rank')
+
     print(class_list)
     print(cmd_dict)
+    print(rank_dict)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
 
 load_modules()
 
-
 @client.event
 async def on_message(message):
+    global rank_dict
 
     if message.channel.id in allowed_channels:
 
         if message.content.startswith('py help'):
-            helpmsg = 'Available commands are: ```\n' + '\n'.join(global_cmd_list) + '```\nUse $x in the command ' \
-                                                                                     'to pass parameter x to ' \
-                                                                                     'a function that requires it'
-            await client.send_message(message.channel, helpmsg)
+            help_msg = "```"
+            for i in rank_dict:
+                # if int(i) <= int(ranks[message.author.id]):  # TODO: impliment ranks
+                help_msg += eval(i + '.help')
+            help_msg += '```\nUse `$x` in the command to pass parameter `x` to a function that requires it'
+            await client.send_message(message.channel, help_msg)
         else:
 
             cmd_args = message.content.split()
