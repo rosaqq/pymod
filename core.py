@@ -26,46 +26,60 @@ allowed_channels = ['140225706230677504', '143055883755192321', '128470036980563
 
 
 def load_modules():
+    global cmd_dict
+    global global_cmd_list
     class_list = []
+    global_cmd_list = []
+    cmd_dict = {}
     module_list = os.listdir('mods')
     for j in module_list:
         if j.endswith('.py'):
             class_list.append(str(j)[0:-3])
-    return class_list
 
-valid_list = load_modules()
+    sys.path.append('mods')
+    for i in class_list:
+        exec("globals()['" + i + "'] = __import__('" + i + "')." + i)
 
-sys.path.append('mods')
-for i in valid_list:
-    c = __import__(i)
-    exec(i + " = c." + i)
+    for v in class_list:
+        class_cmd_list = [x for x, y in eval(v + '.__dict__.items()') if type(y) == FunctionType and 'py_' in x]
+        cmd_dict[v] = class_cmd_list
+        for w in class_cmd_list:
+            global_cmd_list.append(w)
+    print(class_list)
+    print(cmd_dict)
 
-cmd_dict = {}
-print(valid_list)
-for v in valid_list:
-    cmd_list = [x for x, y in eval(v + '.__dict__.items()') if type(y) == FunctionType and 'py_' in x]
-    cmd_dict[v] = cmd_list
+
 # ----------------------------------------------------------------------------------------------------------------------
-print(cmd_dict)
-print(cmd_list)
+
+load_modules()
 
 
 @client.event
 async def on_message(message):
 
     if message.channel.id in allowed_channels:
-        cmd_args = message.content.split()
-        args = [x for x in cmd_args if '$' in x]
-        cmd = '_'.join([y for y in cmd_args if '$' not in y])
-        for key in cmd_dict:
-            if cmd in cmd_dict[key]:
-                exec('a = ' + key + '(client, message)')
-                try:
-                    await eval('a.' + cmd + '(*args)')
-                except TypeError:
-                    msg = 'This function requires ' + str(eval('len(inspect.signature(a.' + cmd + ').parameters)')) +\
-                          ' parameters.\nYou provided ' + str(len(args)) + '.'
-                    await client.send_message(message.channel, msg)
+
+        if message.content.startswith('py help'):
+            helpmsg = 'Available commands are: ```\n' + '\n'.join(global_cmd_list) + '```\nUse $x in the command ' \
+                                                                                     'to pass parameter x to ' \
+                                                                                     'a function that requires it'
+            await client.send_message(message.channel, helpmsg)
+        else:
+
+            cmd_args = message.content.split()
+            args = [x for x in cmd_args if '$' in x]
+            for asd in args:
+                args[args.index(asd)] = args[args.index(asd)].replace('$', '')
+            cmd = '_'.join([y for y in cmd_args if '$' not in y])
+            for key in cmd_dict:
+                if cmd in cmd_dict[key]:
+                    exec('a = ' + key + '(client, message)')
+                    try:
+                        await eval('a.' + cmd + '(*args)')
+                    except TypeError:
+                        msg = 'This function requires ' + str(eval('len(inspect.signature(a.' + cmd + ').parameters)'))\
+                              + ' parameters.\nYou provided ' + str(len(args)) + '.'
+                        await client.send_message(message.channel, msg)
 
 
 @client.event

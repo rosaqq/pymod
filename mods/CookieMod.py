@@ -8,10 +8,13 @@ class CookieMod:
         self.cookie = realcookie.cookie()
 
     async def py_cookie(self):
-        await self.client.send_file(self.message.channel, fp=self.cookie.gib())
+        try:
+            await self.client.send_file(self.message.channel, fp=self.cookie.gib())
+        except FileNotFoundError:
+            await self.client.send_message(self.message.channel, 'There are no cookies in the database.')
 
     async def py_cookie_add(self, img_url):
-        self.cookie_add(img_url)
+        self.cookie.add(img_url)
 
     async def py_cookie_count(self):
         cookie_num = self.cookie.count()
