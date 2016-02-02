@@ -3,21 +3,56 @@ import sys
 import os
 import configparser
 from types import FunctionType
-import inspect
+import pickle
 
 config = configparser.ConfigParser()
 config.read("pymod.ini")
 
 client = discord.Client()
 
+global debug
+debug = False
+
+# pickling and stuff
+db = {}
+try:
+    # Opens the saved db dict, will fail when empty so it's excepted with a console log
+    with open('pymod.txt', 'rb') as db_dict:
+        db = pickle.load(db_dict)
+except EOFError:
+    print("Either pymod.txt is empty (which is okay), or something else went wrong (which might be less okay).")
+
 # join server derp code, commented out for faster boot
-'''
+
 if input('Configure?(y/n)') == 'y':
+    if input("Debug? ") == 'y':
+        global debug
+        debug = True
     if input('Join a new server?(y/n)') == 'y':
         invCode = input('Paste invite URL or code here: ')
         client.accept_invite(invCode)
+    if input('Add rank?(y/n)') ==  'y':
+        id = input('Paste your id (not name) here: ')
+        while True:
+            try:
+                rank = int(input("What rank would you like this id to be? (0-100)"))
+                if rank < 0 or rank > 100:
+                    raise ValueError
+                break
+            except ValueError as e:
+                print("Gj you broke it. Here's the error: " + str(e) + " Try again, don't break it this time.")
+        if 'ranks' in db:
+            db['ranks'][id] = rank
+        else:
+            db['ranks'] = {id : rank}
+        with open('pymod.txt', 'wb') as db_dict:
+            # Saves the ranks eveytime a message is received. Easy and probably really inefficant but good enough.
+            pickle.dump(db, db_dict)
+        if debug:
+            print(db)
+
 print('Connecting to discord servers...')
-'''
+
 
 allowed_channels = ['140225706230677504', '143055883755192321', '128470036980563968']
 
@@ -53,9 +88,10 @@ def load_modules():
     for x in class_list:  # Generate rank requirements. Can only be done per module globally, but we can work around it
         rank_dict[x] = eval(x + '.rank')
 
-    print(class_list)
-    print(cmd_dict)
-    print(rank_dict)
+    if debug:
+        print(class_list)
+        print(cmd_dict)
+        print(rank_dict)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -68,15 +104,26 @@ async def on_message(message):
 
     if message.channel.id in allowed_channels:
 
-        if message.content.startswith('py help'):
+        if '_'.join(message.content.split()).lower().startswith("py_help"):
             help_msg = "```"
             for i in rank_dict:
                 # if int(i) <= int(ranks[message.author.id]):  # TODO: impliment ranks
                 help_msg += eval(i + '.help')
             help_msg += '```\nUse `$x` in the command to pass parameter `x` to a function that requires it'
             await client.send_message(message.channel, help_msg)
-        else:
+        elif '_'.join(message.content.split()).lower().startswith("py_rank"):
+            pass
 
+        elif '_'.join(message.content.split()).lower().startswith("py_save_enable"):
+            pass
+
+        elif '_'.join(message.content.split()).lower().startswith("py_save_disable"):
+            pass
+
+        elif '_'.join(message.content.split()).lower().startswith("py_save"):
+            pass
+
+        else:
             cmd_args = message.content.split()
             args = [x for x in cmd_args if '$' in x]
             for asd in args:
