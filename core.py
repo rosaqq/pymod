@@ -10,10 +10,15 @@ config.read("pymod.ini")
 
 client = discord.Client()
 
+# Globals
 global debug
 debug = False
+global save
+save = True
+global activator
+activator = "py"
 
-# pickling and stuff
+# Pickle
 db = {}
 try:
     # Opens the saved db dict, will fail when empty so it's excepted with a console log
@@ -31,6 +36,7 @@ if input('Configure?(y/n)') == 'y':
     if input('Join a new server?(y/n)') == 'y':
         invCode = input('Paste invite URL or code here: ')
         client.accept_invite(invCode)
+
     if input('Add rank?(y/n)') ==  'y':
         id = input('Paste your id (not name) here: ')
         while True:
@@ -101,43 +107,51 @@ load_modules()
 @client.event
 async def on_message(message):
     global rank_dict
+    global activator
 
     if message.channel.id in allowed_channels:
 
-        if '_'.join(message.content.split()).lower().startswith("py_help"):
+        if '_'.join(message.content.split()).lower().startswith(activator + "_help"):
             help_msg = "```"
             for i in rank_dict:
                 # if int(i) <= int(ranks[message.author.id]):  # TODO: impliment ranks
                 help_msg += eval(i + '.help')
             help_msg += '```\nUse `$x` in the command to pass parameter `x` to a function that requires it'
             await client.send_message(message.channel, help_msg)
-        elif '_'.join(message.content.split()).lower().startswith("py_rank"):
+
+        elif '_'.join(message.content.split()).lower().startswith(activator + "_callme"):  # Change the activator. i.e.: "pydev help" instead of "py help"
+            cmd_args = message.content.split()
+            try:
+                args = [x for x in cmd_args if '$' in x]
+            except IndexError:
+                await client.send_message(message.channel, "This function requires 1 paramater(s).\n You provided 0")
+            if len(args) != 1:
+                await client.send_message(message.channel, "This function requires 1 paramater(s).\n You provided " + str(len(args)))
+            else:
+                activator = str(args[0][1:])  # Set activator to the $arg - '$'
+                await client.send_message(message.channel, "I will now only respond to " + str(args[0][1:]))
+
+        elif '_'.join(message.content.split()).lower().startswith(activator + "_rank"):
             pass
 
-        elif '_'.join(message.content.split()).lower().startswith("py_save_enable"):
-            pass
 
-        elif '_'.join(message.content.split()).lower().startswith("py_save_disable"):
-            pass
-
-        elif '_'.join(message.content.split()).lower().startswith("py_save"):
-            pass
 
         else:
-            cmd_args = message.content.split()
-            args = [x for x in cmd_args if '$' in x]
-            for asd in args:
-                args[args.index(asd)] = args[args.index(asd)].replace('$', '')
-            cmd = '_'.join([y for y in cmd_args if '$' not in y])
-            for key in cmd_dict:
-                if cmd in cmd_dict[key]:
-                    exec('a = ' + key + '(client, message)')
-                    try:
-                        await eval('a.' + cmd + '(*args)')
-                    except TypeError:
-                        msg = 'This function requires ' + str(eval('len(inspect.signature(a.' + cmd + ').parameters)'))\
-                              + ' parameters.\nYou provided ' + str(len(args)) + '.'
-                        await client.send_message(message.channel, msg)
+            if activator.lower() in message.content.lower():  # Added this because it was breaking for some reason
+                cmd_args = message.content.split()
+                args = [x for x in cmd_args if '$' in x]
+                for asd in args:
+                    args[args.index(asd)] = args[args.index(asd)].replace('$', '')
+                cmd = '_'.join([y for y in cmd_args if '$' not in y])
+                for key in cmd_dict:
+                    if cmd.replace(activator, "py", 1) in cmd_dict[key]:
+                        exec('a = ' + key + '(client, message)')
+                        try:
+                            await eval('a.' + cmd.replace(activator, "py", 1) + '(*args)')
+                        except TypeError:
+                            msg = 'This function requires ' + str(eval('len(inspect.signature(a.' + cmd.replace(activator, "py", 1) + ').parameters)'))\
+                                  + ' parameter(s).\nYou provided ' + str(len(args)) + '.'
+                            await client.send_message(message.channel, msg)
 
 
 @client.event
@@ -146,6 +160,11 @@ async def on_ready():
     print(client.user.name)
     print(client.user.id)
     print('------')
+
+def save_db():
+    with open('pymod.txt', 'wb') as db_dict:
+        pickle.dump(db, db_dict)
+
 
 
 client.run(config['AUTH']['email'], config['AUTH']['pass'])

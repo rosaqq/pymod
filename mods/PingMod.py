@@ -1,6 +1,6 @@
 class PingMod:
     rank = 0
-    help = "\npy_ping: pong\n"
+    help = "\nPing:\n   ping: pong\n"
     def __init__(self, client, message):
         self.client = client
         self.message = message

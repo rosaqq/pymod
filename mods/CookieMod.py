@@ -3,7 +3,7 @@ import realcookie
 
 class CookieMod:
     rank = 10
-    help = "\nCookie:\n   py_cookie: Gives a cookie from db\n   py_cookie_add: Adds a cookie to the db\n   py_cookie_count: Number of cookies in the db\n   py_cookie_rm: removes a cookie from the db\n"
+    help = "\nCookie:\n   cookie: Gives a cookie from db\n   cookie_add: Adds a cookie to the db\n   cookie_count: Number of cookies in the db\n   cookie_rm: removes a cookie from the db\n"
 
     def __init__(self, client, message):
         self.client = client
