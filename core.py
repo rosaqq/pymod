@@ -3,6 +3,7 @@ import sys
 import os
 import configparser
 from types import FunctionType
+import gvar
 import inspect
 
 config = configparser.ConfigParser()
@@ -19,34 +20,35 @@ if input('Configure?(y/n)') == 'y':
 print('Connecting to discord servers...')
 '''
 
-allowed_channels = ['140225706230677504', '143055883755192321', '128470036980563968']
+gvar.load()
+
+if 'allowed_channels' not in gvar.pyvars:
+    gvar.pyvars = {'allowed_channels': []}
+
 
 # module loader
 # ----------------------------------------------------------------------------------------------------------------------
 
 
 def load_modules():
-    global cmd_dict
-    global global_cmd_list
-    class_list = []
-    global_cmd_list = []
-    cmd_dict = {}
-    module_list = os.listdir('mods')
-    for j in module_list:
+    gvar.pyvars['class_list'] = []
+    gvar.pyvars['cmd_list'] = []
+    gvar.pyvars['cmd_dict'] = {}
+    mods = os.listdir('mods')
+    for j in mods:
         if j.endswith('.py'):
-            class_list.append(str(j)[0:-3])
+            gvar.pyvars['class_list'].append(str(j)[0:-3])
 
     sys.path.append('mods')
-    for i in class_list:
+    for i in gvar.pyvars['class_list']:
         exec("globals()['" + i + "'] = __import__('" + i + "')." + i)
 
-    for v in class_list:
+    for v in gvar.pyvars['class_list']:
         class_cmd_list = [x for x, y in eval(v + '.__dict__.items()') if type(y) == FunctionType and 'py_' in x]
-        cmd_dict[v] = class_cmd_list
+        gvar.pyvars['cmd_dict'][v] = class_cmd_list
         for w in class_cmd_list:
-            global_cmd_list.append(w)
-    print(class_list)
-    print(cmd_dict)
+            gvar.pyvars['cmd_list'].append(w)
+    print(gvar.pyvars)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -57,12 +59,21 @@ load_modules()
 @client.event
 async def on_message(message):
 
-    if message.channel.id in allowed_channels:
+    if message.content == 'py come':
+        gvar.pyvars['allowed_channels'].append(message.channel.id)
+        await client.send_message(message.channel, "channel enabled")
+    elif message.content == 'py leave':
+        gvar.pyvars['allowed_channels'].remove(message.channel.id)
+        await client.send_message(message.channel, "channel disabled")
+
+    elif message.channel.id in gvar.pyvars['allowed_channels']:
 
         if message.content.startswith('py help'):
-            helpmsg = 'Available commands are: ```\n' + '\n'.join(global_cmd_list) + '```\nUse $x in the command ' \
-                                                                                     'to pass parameter x to ' \
-                                                                                     'a function that requires it'
+            helpmsg = 'Available commands are: ```\n' + '\n'.join(gvar.pyvars['cmd_list']) + '```\nUse $x in ' \
+                                                                                             'the command to pass ' \
+                                                                                             'parameter x to ' \
+                                                                                             'a function that ' \
+                                                                                             'requires it.'
             await client.send_message(message.channel, helpmsg)
         else:
 
@@ -71,15 +82,18 @@ async def on_message(message):
             for asd in args:
                 args[args.index(asd)] = args[args.index(asd)].replace('$', '')
             cmd = '_'.join([y for y in cmd_args if '$' not in y])
-            for key in cmd_dict:
-                if cmd in cmd_dict[key]:
+            for key in gvar.pyvars['cmd_dict']:
+                if cmd in gvar.pyvars['cmd_dict'][key]:
                     exec('a = ' + key + '(client, message)')
                     try:
                         await eval('a.' + cmd + '(*args)')
-                    except TypeError:
+                    except TypeError as error:
                         msg = 'This function requires ' + str(eval('len(inspect.signature(a.' + cmd + ').parameters)'))\
                               + ' parameters.\nYou provided ' + str(len(args)) + '.'
                         await client.send_message(message.channel, msg)
+                        print(error)
+
+    gvar.save()
 
 
 @client.event
