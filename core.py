@@ -132,7 +132,13 @@ async def on_message(message):
                 await client.send_message(message.channel, "I will now only respond to " + str(args[0][1:]))
 
         elif '_'.join(message.content.split()).lower().startswith(activator + "_rank"):
-            pass
+            cmd_args = message.content.split()
+            args = [x for x in cmd_args if '$' in x]
+            for asd in args:
+                args[args.index(asd)] = args[args.index(asd)].replace('$', '')
+            if len(args) != 2:
+                client.send_message(message.channel, "This function requires 2 parameter(s)")  # TODO: finish this
+
 
 
 
