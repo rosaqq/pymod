@@ -6,6 +6,7 @@ class CookieMod:
         self.client = client
         self.message = message
         self.cookie = realcookie.cookie()
+        self.rank = 0
 
     async def py_cookie(self):
         try:
