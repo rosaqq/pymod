@@ -78,6 +78,7 @@ async def on_message(message):
 
         else:
             try:
+                # check if cmd in natives
                 for key in bot_vars['natives']:
                     if cmd in bot_vars['natives'][key]:
                             nat = True
@@ -87,6 +88,7 @@ async def on_message(message):
                             else:
                                 await client.send_message(message.channel, 'permission denied')
 
+                # check in modules
                 for key in bot_vars['cmd_dict']:
                     if cmd in bot_vars['cmd_dict'][key]:
                             nat = False
@@ -95,6 +97,8 @@ async def on_message(message):
                                 await eval('a.' + cmd + '(*args)')
                             else:
                                 await client.send_message(message.channel, 'permission denied')
+
+            # I know this is retarded but only very rarely it catches exceptions unrelated to the args
             except Exception as retard:
                 given = eval('len(inspect.signature(a.' + cmd + ').parameters)')
                 if nat:

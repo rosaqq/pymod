@@ -29,6 +29,8 @@ class PycChannel:
             await self.client.send_message(self.message.channel, "channel disabled")
         else:
             await self.client.send_message(self.message.channel, "channel already disabled")
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 # end of Channel class
 
@@ -48,6 +50,8 @@ class PycHelp:
                                                                              'parameter x to a function that ' \
                                                                              'requires it.'
         await self.client.send_message(self.message.channel, helpmsg)
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 # end of Help class
 
@@ -83,6 +87,11 @@ class PycRoot:
         except Exception as lol:
             await self.client.send_message(self.message.channel, lol)
 
+    async def py_callme(self, callsign):
+        bot_vars['callsign'] = str(callsign)
+        await self.client.send_message(self.message.channel, 'new callsign: ' + str(callsign))
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 # end of Root class
 
@@ -90,13 +99,18 @@ class PycRoot:
 # command parser
 # ----------------------------------------------------------------------------------------------------------------------
 def parse(message):
-    cmd_args = message.content.split()
-    cmd = '_'.join([y for y in cmd_args if '$' not in y])
-    args = [x for x in cmd_args if '$' in x]
-    for asd in args:
-        args[args.index(asd)] = \
-            args[args.index(asd)].replace('$', '').replace('\\n', '\n').replace('\\t', '\t').replace('\\s', '\u0020')
-    return cmd, args
+    if bot_vars['callsign'] in message.content:
+        cmd_args = message.content.replace(bot_vars['callsign'], 'py').split()
+        cmd = '_'.join([y for y in cmd_args if '$' not in y])
+        args = [x for x in cmd_args if '$' in x]
+        for asd in args:
+            args[args.index(asd)] = \
+                args[args.index(asd)].replace('$', '').replace('\\n', '\n').replace('\\t', '\t').replace('\\s',
+                                                                                                         '\u0020')
+        return cmd, args
+    else:
+        return 'wrong_callsign', []
+
 
 # ------------------------------------------------------------------------------------------------------------------
 
@@ -116,13 +130,15 @@ def load():
             save_file.close()
     except IOError:
         admin1, admin2 = config['GENERAL']['adminID'], config['GENERAL']['adminID2']
-        __builtins__['bot_vars'] = {'ranks': {admin1: 512, admin2: 512}, 'allowed_channels': [], 'cmd_dict': {}}
+        __builtins__['bot_vars'] = {'ranks': {admin1: 512, admin2: 512}, 'allowed_channels': [],
+                                    'cmd_dict': {}, 'callsign': 'py'}
         save()
 
 
 def reset():
     os.remove('bot_vars.pickle')
     load()
+
 
 config = configparser.ConfigParser()
 config.read('pymod.ini')
