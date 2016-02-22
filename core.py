@@ -16,7 +16,7 @@ debug = False
 global save
 save = True
 global activator
-activator = "py"
+activator = "pyko"
 
 # Pickle
 db = {}
@@ -29,38 +29,38 @@ except EOFError:
 
 # join server derp code, commented out for faster boot
 
-if input('Configure?(y/n)') == 'y':
-    if input("Debug? ") == 'y':
-        global debug
-        debug = True
-    if input('Join a new server?(y/n)') == 'y':
-        invCode = input('Paste invite URL or code here: ')
-        client.accept_invite(invCode)
-
-    if input('Add rank?(y/n)') ==  'y':
-        id = input('Paste your id (not name) here: ')
-        while True:
-            try:
-                rank = int(input("What rank would you like this id to be? (0-100)"))
-                if rank < 0 or rank > 100:
-                    raise ValueError
-                break
-            except ValueError as e:
-                print("Gj you broke it. Here's the error: " + str(e) + " Try again, don't break it this time.")
-        if 'ranks' in db:
-            db['ranks'][id] = rank
-        else:
-            db['ranks'] = {id : rank}
-        with open('pymod.txt', 'wb') as db_dict:
-            # Saves the ranks eveytime a message is received. Easy and probably really inefficant but good enough.
-            pickle.dump(db, db_dict)
-        if debug:
-            print(db)
+# if input('Configure?(y/n)') == 'y':
+#     if input("Debug? ") == 'y':
+#         global debug
+#         debug = True
+#     if input('Join a new server?(y/n)') == 'y':
+#         invCode = input('Paste invite URL or code here: ')
+#         client.accept_invite(invCode)
+#
+#     if input('Add rank?(y/n)') ==  'y':
+#         id = input('Paste your id (not name) here: ')
+#         while True:
+#             try:
+#                 rank = int(input("What rank would you like this id to be? (0-100)"))
+#                 if rank < 0 or rank > 100:
+#                     raise ValueError
+#                 break
+#             except ValueError as e:
+#                 print("Gj you broke it. Here's the error: " + str(e) + " Try again, don't break it this time.")
+#         if 'ranks' in db:
+#             db['ranks'][id] = rank
+#         else:
+#             db['ranks'] = {id : rank}
+#         with open('pymod.txt', 'wb') as db_dict:
+#             # Saves the ranks eveytime a message is received. Easy and probably really inefficant but good enough.
+#             pickle.dump(db, db_dict)
+#         if debug:
+#             print(db)
 
 print('Connecting to discord servers...')
 
-
 allowed_channels = ['140225706230677504', '143055883755192321', '128470036980563968']
+
 
 # module loader
 # ----------------------------------------------------------------------------------------------------------------------
@@ -104,10 +104,23 @@ def load_modules():
 
 load_modules()
 
+
 @client.event
 async def on_message(message):
     global rank_dict
     global activator
+
+    if '_'.join(message.content.split()).lower().startswith(activator + "_come"):
+        if message.channel.id in allowed_channels:
+            await client.send_message(message.channel, "I was already here")
+        else:
+            allowed_channels.append(message.channel.id)
+            await client.send_message(message.channel, "I'm here")
+
+    if '_'.join(message.content.split()).lower().startswith(activator + "_leave"):
+        if message.channel.id in allowed_channels:
+            allowed_channels.remove(message.channel.id)
+            await client.send_message(message.channel, "I'm gone")
 
     if message.channel.id in allowed_channels:
 
@@ -117,16 +130,18 @@ async def on_message(message):
                 # if int(i) <= int(ranks[message.author.id]):  # TODO: impliment ranks
                 help_msg += eval(i + '.help')
             help_msg += '```\nUse `$x` in the command to pass parameter `x` to a function that requires it'
-            await client.send_message(message.channel, help_msg)
+            await client.send_message(message.author, help_msg)
 
-        elif '_'.join(message.content.split()).lower().startswith(activator + "_callme"):  # Change the activator. i.e.: "pydev help" instead of "py help"
+        elif '_'.join(message.content.split()).lower().startswith(
+                        activator + "_callme"):  # Change the activator. i.e.: "pydev help" instead of "py help"
             cmd_args = message.content.split()
             try:
                 args = [x for x in cmd_args if '$' in x]
             except IndexError:
                 await client.send_message(message.channel, "This function requires 1 paramater(s).\n You provided 0")
             if len(args) != 1:
-                await client.send_message(message.channel, "This function requires 1 paramater(s).\n You provided " + str(len(args)))
+                await client.send_message(message.channel,
+                                          "This function requires 1 paramater(s).\n You provided " + str(len(args)))
             else:
                 activator = str(args[0][1:])  # Set activator to the $arg - '$'
                 await client.send_message(message.channel, "I will now only respond to " + str(args[0][1:]))
@@ -138,9 +153,6 @@ async def on_message(message):
                 args[args.index(asd)] = args[args.index(asd)].replace('$', '')
             if len(args) != 2:
                 client.send_message(message.channel, "This function requires 2 parameter(s)")  # TODO: finish this
-
-
-
 
         else:
             if activator.lower() in message.content.lower():  # Added this because it was breaking for some reason
@@ -155,7 +167,8 @@ async def on_message(message):
                         try:
                             await eval('a.' + cmd.replace(activator, "py", 1) + '(*args)')
                         except TypeError:
-                            msg = 'This function requires ' + str(eval('len(inspect.signature(a.' + cmd.replace(activator, "py", 1) + ').parameters)'))\
+                            msg = 'This function requires ' + str(
+                                eval('len(inspect.signature(a.' + cmd.replace(activator, "py", 1) + ').parameters)')) \
                                   + ' parameter(s).\nYou provided ' + str(len(args)) + '.'
                             await client.send_message(message.channel, msg)
 
@@ -167,10 +180,10 @@ async def on_ready():
     print(client.user.id)
     print('------')
 
+
 def save_db():
     with open('pymod.txt', 'wb') as db_dict:
         pickle.dump(db, db_dict)
-
 
 
 client.run(config['AUTH']['email'], config['AUTH']['pass'])

@@ -20,4 +20,3 @@ class EvalMod:
                 await self.client.send_message(self.message.channel, "```python\n" + str(output) + "```")
             except Exception as e:
                 await self.client.send_message(self.message.channel, "Something broke with that: " + str(e))
-
