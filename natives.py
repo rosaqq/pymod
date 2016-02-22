@@ -35,27 +35,6 @@ class PycChannel:
 # end of Channel class
 
 
-class PycHelp:
-    def __init__(self, client, message):
-        self.client = client
-        self.message = message
-        self.rank = 0
-
-    async def py_help(self):
-        listing = []
-        for key in bot_vars['cmd_dict']:
-            for thing in bot_vars['cmd_dict'][key]:
-                listing.append(thing)
-            helpmsg = 'Available commands are: ```\n' + '\n'.join(listing) + '```\nUse $x in the command to pass ' \
-                                                                             'parameter x to a function that ' \
-                                                                             'requires it.'
-        await self.client.send_message(self.message.channel, helpmsg)
-
-
-# ----------------------------------------------------------------------------------------------------------------------
-# end of Help class
-
-
 class PycRoot:
     def __init__(self, client, message):
         self.client = client
