@@ -2,14 +2,14 @@ import realcookie
 
 
 class CookieMod:
-    rank = 10
-    help = "\nCookie:\n   cookie: Gives a cookie from db\n   cookie_add: Adds a cookie to the db\n   cookie_count: Number of cookies in the db\n   cookie_rm: removes a cookie from the db\n"
+    rank = 0
+    help_dict = {'py_cookie': 'sends a cookie img on channel', 'py_cookie_add': 'add cookie to db from url',
+                 'py_cookie_count': 'chat the number of cookies in db', 'py_cookie_rm': 'deletes all the cookies in db'}
 
     def __init__(self, client, message):
         self.client = client
         self.message = message
         self.cookie = realcookie.cookie()
-        self.rank = 0
 
     async def py_cookie(self):
         try:

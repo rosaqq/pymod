@@ -4,7 +4,7 @@ import json
 
 class GoogleMod:
     rank = 0
-    help = "\nGoogle:\n   search: searches google for $, returning $int results (default 1, limited to 1 outside of pms)\n"
+    help_dict = {'py_search': 'search google'}
 
     def __init__(self, client, message):
         self.client = client
@@ -18,6 +18,7 @@ class GoogleMod:
         # string = response.read(res).decode('utf-8')
         # results = json.loads(str(res))
         if "items" in results:
-            await self.client.send_message(self.message.channel, "`" + str(results["items"][0]["title"]) + "`\n" + str(results["items"][0]["snippet"]) + "\nLink: " + str(results["items"][0]["link"]))
+            await self.client.send_message(self.message.channel, "`" + str(results["items"][0]["title"]) + "`\n" + str(
+                    results["items"][0]["snippet"]) + "\nLink: " + str(results["items"][0]["link"]))
         else:
             await self.client.send_message(self.message.channel, "Couldn't find anything ;-;")

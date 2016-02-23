@@ -1,6 +1,7 @@
 class UserMod:
     rank = 100
-    help = "\nUser:\n  usearch: Search for users by partial or full name\n"
+    help_dict = {'py_usearch': 'searches servers for specified username'}
+
     def __init__(self, client, message):
         self.client = client
         self.message = message

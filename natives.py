@@ -11,10 +11,12 @@ import os
 
 
 class PycChannel:
+    rank = 25
+    help_dict = {'py_come': 'bring pymod to channel', 'py_leave': 'remove pymod from channel'}
+
     def __init__(self, client, message):
         self.client = client
         self.message = message
-        self.rank = 25
 
     async def py_come(self):
         if self.message.channel.id in bot_vars['allowed_channels']:
@@ -36,10 +38,13 @@ class PycChannel:
 
 
 class PycRoot:
+    rank = 100
+    help_dict = {'py_eval': 'chats eval(args)', 'py_aeval': 'awaits eval(args)', 'py_exec': 'exec(args)',
+                 'py_callme': 'sets callsign'}
+
     def __init__(self, client, message):
         self.client = client
         self.message = message
-        self.rank = 100
 
     async def py_eval(self, *args):
         try:

@@ -1,8 +1,10 @@
 class RankMod:
+    rank = 100
+    help_dict = {'py_rank': 'set a user1\'s rank'}
+
     def __init__(self, client, message):
         self.client = client
         self.message = message
-        self.rank = 100
 
     async def py_rank(self, user, rank):
         a = user.replace('<@', '')

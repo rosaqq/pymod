@@ -16,6 +16,10 @@ def load_natives():
         bot_vars['natives'][i] = [x for x, y in eval('natives.' + i + '.__dict__.items()')
                                   if type(y) == FunctionType and 'py_' in x]
 
+
+# ----------------------------------------------------------------------------------------------------------------------
+
+
 # module loader
 # ----------------------------------------------------------------------------------------------------------------------
 def load_modules():
@@ -28,6 +32,8 @@ def load_modules():
             exec("globals()['" + i + "'] = __import__('" + i + "')." + i)
             bot_vars['cmd_dict'][i] = \
                 [x for x, y in eval(i + '.__dict__.items()') if type(y) == FunctionType and 'py_' in x]
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 
 
@@ -48,6 +54,7 @@ def py_reset(args):
     else:
         return 'invalid args: use py reset $full/$mods/$nats'
 
+
 # ----------------------------------------------------------------------------------------------------------------------
 print('Connecting to discord servers...')
 
@@ -63,7 +70,7 @@ print('bot_vars pre-set to: ' + str(bot_vars))
 async def on_message(message):
     cmd, args = natives.parse(message)
     helpcmd = False
-    listing = []
+    helplist = {}
 
     if cmd == 'py_come' or cmd == 'py_leave' or message.channel.id in bot_vars['allowed_channels']:
         try:
@@ -81,39 +88,41 @@ async def on_message(message):
                 # check if cmd in natives
                 for key in bot_vars['natives']:
                     if cmd in bot_vars['natives'][key]:
-                        nat = True
-                        exec('a = natives.' + key + '(client, message)')
-                        if user_rank >= eval('a.rank'):
+                        if user_rank >= eval('natives.' + key + '.rank'):
+                            nat = True
+                            exec('a = natives.' + key + '(client, message)')
                             await eval('a.' + cmd + '(*args)')
                         else:
                             await client.send_message(message.channel, 'permission denied')
                     elif cmd == 'py_help':
                         helpcmd = True
-                        exec('a = natives.' + key + '(client, message)')
-                        if user_rank >= eval('a.rank'):
-                            for thing in bot_vars['natives'][key]:
-                                listing.append(thing)
+                        if user_rank >= eval('natives.' + key + '.rank'):
+                            for func in bot_vars['natives'][key]:
+                                helplist[func] = eval('natives.' + key + '.help_dict[func]')
                 # check in modules
                 for key in bot_vars['cmd_dict']:
                     if cmd in bot_vars['cmd_dict'][key]:
-                        nat = False
-                        exec('a = ' + key + '(client, message)')
-                        if user_rank >= eval('a.rank'):
+                        if user_rank >= eval(key + '.rank'):
+                            nat = False
+                            exec('a = ' + key + '(client, message)')
                             await eval('a.' + cmd + '(*args)')
                         else:
                             await client.send_message(message.channel, 'permission denied')
                     elif cmd == 'py_help':
                         helpcmd = True
-                        exec('a = ' + key + '(client, message)')
-                        if user_rank >= eval('a.rank'):
-                            for thing in bot_vars['cmd_dict'][key]:
-                                listing.append(thing)
+                        if user_rank >= eval(key + '.rank'):
+                            for func in bot_vars['cmd_dict'][key]:
+                                helplist[func] = helplist[func] = eval(key + '.help_dict[func]')
                 if helpcmd:
-                    helpmsg = 'Available commands are: ```\n' + '\n'.join(
-                                listing) + '```\nUse $x in the command to pass ' \
-                                           'parameter x to a function that ' \
-                                           'requires it.'
-                    await client.send_message(message.author, helpmsg)
+                    helpmsg = []
+                    for func in helplist:
+                        helpmsg.append(func + ': ' + helplist[func])
+                    msg = 'Available commands are: ```\n' + '\n'.join(helpmsg) + '```\nUse $x in the command to pass ' \
+                                                                                 'parameter x to a function that' \
+                                                                                 ' requires it.\n( _ represents a ' \
+                                                                                 'space and "py" should be replaced ' \
+                                                                                 'by the current callsign)'
+                    await client.send_message(message.author, msg)
 
             # I know this is retarded but only very rarely it catches exceptions unrelated to the args
             except Exception as retard:
@@ -133,11 +142,6 @@ async def on_ready():
     print(client.user.name)
     print(client.user.id)
     print('------')
-
-
-def save_db():
-    with open('pymod.txt', 'wb') as db_dict:
-        pickle.dump(db, db_dict)
 
 
 client.run(config['AUTH']['email'], config['AUTH']['pass'])

@@ -4,11 +4,13 @@ import shutil
 
 
 class PickleMod:
+    rank = 100
+    help_dict = {'py_pickle': 'save something to file', 'py_loadpickle': 'chat what was saved in the specified file',
+                 'py_delpickle': 'trash a pickle'}
 
     def __init__(self, client, message):
         self.client = client
         self.message = message
-        self.rank = 100
         self.folder = 'pickles'
 
     async def py_pickle(self, file, someth):
@@ -39,4 +41,3 @@ class PickleMod:
                 await self.client.send_message(self.message.channel, 'pickle trashed.')
         except IOError:
             await self.client.send_message(self.message.channel, 'No such file.')
-
