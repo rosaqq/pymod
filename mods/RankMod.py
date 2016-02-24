@@ -6,8 +6,9 @@ class RankMod:
         self.client = client
         self.message = message
 
-    async def py_rank(self, user, rank):
+    async def py_setrank(self, user, rank):
         a = user.replace('<@', '')
         b = a.replace('>', '')
         bot_vars['ranks'][b] = int(rank)
         await self.client.send_message(self.message.channel, 'set ' + user + "'s rank to " + rank)
+

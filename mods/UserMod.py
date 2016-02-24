@@ -1,5 +1,5 @@
 class UserMod:
-    rank = 100
+    rank = 0
     help_dict = {'py_usearch': 'searches servers for specified username'}
 
     def __init__(self, client, message):
@@ -17,6 +17,18 @@ class UserMod:
                     name_num += 1
                     names_len += len("\n  " + member.name + "  `" + member.id + "`")
         if names_len > 1900:
-            await self.client.send_message(self.message.channel, "The message was too long to send, so I have shortened it and PM'd you")
+            await self.client.send_message(self.message.channel,
+                                           "The message was too long to send, so I have shortened it and PM'd you")
             await self.client.send_message(self.message.author, names[:1995].format(name_num))
         await self.client.send_message(self.message.channel, names.format(name_num))
+
+    async def py_rank(self, user):
+        print(user)
+        if user == 'me':
+            if self.message.author.id in bot_vars['ranks']:
+                await self.client.send_message(self.message.channel,
+                                               'Your rank is: ' + str(bot_vars['ranks'][self.message.author.id]))
+            else:
+                await self.client.send_message(self.message.channel, 'Your rank is: 0')
+        else:
+            await self.client.send_message(self.message.channel, 'You can only use "me" as args to check your own rank')

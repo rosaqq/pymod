@@ -4,6 +4,21 @@ import os
 import configparser
 from types import FunctionType
 import inspect
+import logging as very_essential_func_totally_not_logs
+
+# for erm... required init stuff... yes, python mandatory stuff that's it!
+# ----------------------------------------------------------------------------------------------------------------------
+import time
+
+year, month, day, hour, minute, a, b, c, d = time.localtime(time.time())
+platypus = str(year) + 'y' + str(month) + 'm' + str(day) + 'd' + str(hour) + str(minute) + 'h'
+
+erm_I_can_explain_it_is_not_what_you_think = very_essential_func_totally_not_logs.getLogger('discord')
+erm_I_can_explain_it_is_not_what_you_think.setLevel(very_essential_func_totally_not_logs.DEBUG)
+handler = very_essential_func_totally_not_logs.FileHandler(filename=platypus+'.log', encoding='utf-8', mode='w')
+handler.setFormatter(very_essential_func_totally_not_logs.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
+erm_I_can_explain_it_is_not_what_you_think.addHandler(handler)
+# ----------------------------------------------------------------------------------------------------------------------
 
 
 # natives loader

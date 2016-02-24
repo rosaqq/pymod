@@ -73,6 +73,8 @@ class PycRoot:
 
     async def py_callme(self, callsign):
         bot_vars['callsign'] = str(callsign)
+        name = 'pymod (' + str(callsign) + ')'
+        await self.client.edit_profile(config['AUTH']['pass'], username=name)
         await self.client.send_message(self.message.channel, 'new callsign: ' + str(callsign))
 
 
