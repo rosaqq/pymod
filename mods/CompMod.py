@@ -1,7 +1,12 @@
 """
 scraps compliments from http://emergencycompliment.com/
 
-special thanks to Nate Beatty for taking time to help me scrap the compliments from the above mentioned website
+special thanks to Nate Beatty for taking time to give me some tips and help me scrap compliments
+from the above mentioned website, where he "codes and does fancy internet stuff to everything"
+
+This module is mostly code he provided to me, with a few changes, just to make it fit inside
+the pymod program and python conventions ;)
+
 http://natebeatty.com/
 """
 
