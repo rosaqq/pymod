@@ -52,7 +52,7 @@ def load_modules():
 # ----------------------------------------------------------------------------------------------------------------------
 
 
-# reset function
+# reset function -> has a derping idk why it wont reload new code if you change an exiting module
 # ----------------------------------------------------------------------------------------------------------------------
 def py_reset(args):
     if args == 'mods':
@@ -94,17 +94,13 @@ async def on_message(message):
             user_rank = 0
 
         if user_rank >= 100 and cmd == 'py_reset':
-            try:
-                await client.send_message(message.channel, eval('py_reset(*args)'))
-            except Exception as fml:
-                await client.send_message(message.channel, fml)
+            await client.send_message(message.channel, eval('py_reset(*args)'))
         else:
             try:
                 # check if cmd in natives
                 for key in bot_vars['natives']:
                     if cmd in bot_vars['natives'][key]:
                         if user_rank >= eval('natives.' + key + '.rank'):
-                            nat = True
                             exec('a = natives.' + key + '(client, message)')
                             await eval('a.' + cmd + '(*args)')
                         else:
@@ -118,7 +114,6 @@ async def on_message(message):
                 for key in bot_vars['cmd_dict']:
                     if cmd in bot_vars['cmd_dict'][key]:
                         if user_rank >= eval(key + '.rank'):
-                            nat = False
                             exec('a = ' + key + '(client, message)')
                             await eval('a.' + cmd + '(*args)')
                         else:
@@ -139,14 +134,9 @@ async def on_message(message):
                                                                                  'by the current callsign)'
                     await client.send_message(message.author, msg)
 
-            # I know this is retarded but only very rarely it catches exceptions unrelated to the args
             except Exception as retard:
-                given = eval('len(inspect.signature(a.' + cmd + ').parameters)')
-                if nat:
-                    given -= 3
-                msg = 'This function requires ' + str(given) + ' parameters.\nYou provided ' + str(len(args)) + '.'
+                msg = 'Something went wrong:\n' + str(retard)
                 await client.send_message(message.channel, msg)
-                print(retard)
 
     natives.save()
 
