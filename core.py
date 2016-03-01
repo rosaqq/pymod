@@ -28,8 +28,8 @@ def load_natives():
     bot_vars['natives'] = {}
     native_classes = [x for x, y in natives.__dict__.items() if 'Pyc' in x]
     for i in native_classes:
-        bot_vars['natives'][i] = [x for x, y in eval('natives.' + i + '.__dict__.items()')
-                                  if type(y) == FunctionType and 'py_' in x]
+        funcs = [x for x, y in eval('natives.' + i + '.__dict__.items()') if type(y) == FunctionType and 'py_' in x]
+        bot_vars['natives'][i] = funcs
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -45,32 +45,12 @@ def load_modules():
         if j.endswith('.py'):
             i = j[0:-3]
             exec("globals()['" + i + "'] = __import__('" + i + "')." + i)
-            bot_vars['cmd_dict'][i] = \
-                [x for x, y in eval(i + '.__dict__.items()') if type(y) == FunctionType and 'py_' in x]
+            funcs = [x for x, y in eval(i + '.__dict__.items()') if type(y) == FunctionType and 'py_' in x]
+            bot_vars['cmd_dict'][i] = funcs
 
 
 # ----------------------------------------------------------------------------------------------------------------------
 
-
-# reset function -> has a derping idk why it wont reload new code if you change an exiting module
-# ----------------------------------------------------------------------------------------------------------------------
-def py_reset(args):
-    if args == 'mods':
-        load_modules()
-        return 'modules reloaded'
-    elif args == 'nats':
-        load_natives()
-        return 'natives reloaded'
-    elif args == 'full':
-        natives.reset()
-        load_natives()
-        load_modules()
-        return 'full reset complete'
-    else:
-        return 'invalid args: use py reset $full/$mods/$nats'
-
-
-# ----------------------------------------------------------------------------------------------------------------------
 print('Connecting to discord servers...')
 
 client = discord.Client()
@@ -93,8 +73,10 @@ async def on_message(message):
         except KeyError:
             user_rank = 0
 
-        if user_rank >= 100 and cmd == 'py_reset':
-            await client.send_message(message.channel, eval('py_reset(*args)'))
+        # I need this because. Just because.
+        if False:
+            pass
+
         else:
             try:
                 # check if cmd in natives
