@@ -1,6 +1,6 @@
 class UserMod:
     rank = 0
-    help_dict = {'py_usearch': 'searches servers for specified username'}
+    help_dict = {'py_usearch': 'searches servers for specified username', 'py_rank': 'returns rank'}
 
     def __init__(self, client, message):
         self.client = client

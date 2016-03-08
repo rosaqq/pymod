@@ -8,4 +8,3 @@ class PingMod:
 
     async def py_ping(self):
         await self.client.send_message(self.message.channel, 'pong')
-

@@ -1,6 +1,6 @@
 class RankMod:
     rank = 100
-    help_dict = {'py_rank': 'set a user1\'s rank'}
+    help_dict = {'py_setrank': 'set a user1\'s rank'}
 
     def __init__(self, client, message):
         self.client = client
