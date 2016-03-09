@@ -1,6 +1,6 @@
 class UserMod:
     rank = 0
-    help_dict = {'py_usearch': 'searches servers for specified username', 'py_rank': 'returns rank'}
+    help_dict = {'py_usearch': 'searches servers for specified username', 'py_rank': 'chats a user\'s rank'}
 
     def __init__(self, client, message):
         self.client = client
@@ -23,7 +23,6 @@ class UserMod:
         await self.client.send_message(self.message.channel, names.format(name_num))
 
     async def py_rank(self, user):
-        print(user)
         if user == 'me':
             if self.message.author.id in bot_vars['ranks']:
                 await self.client.send_message(self.message.channel,
@@ -31,4 +30,10 @@ class UserMod:
             else:
                 await self.client.send_message(self.message.channel, 'Your rank is: 0')
         else:
-            await self.client.send_message(self.message.channel, 'You can only use "me" as args to check your own rank')
+            if self.message.author.id in bot_vars['ranks']:
+                a = user.replace('<@', '')
+                user_id = a.replace('>', '')
+                msg = user + "'s rank is: " + str(bot_vars['ranks'][user_id])
+                await self.client.send_message(self.message.channel, msg)
+            else:
+                await self.client.send_message(self.message.channel, 'Your rank is: 0')

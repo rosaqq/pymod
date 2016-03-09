@@ -83,14 +83,13 @@ class PycRoot:
 # command parser
 # ----------------------------------------------------------------------------------------------------------------------
 def parse(message):
-    if bot_vars['callsign'] in message.content:
-        cmd_args = message.content.replace(bot_vars['callsign'], 'py').split()
-        cmd = '_'.join([y for y in cmd_args if '$' not in y])
-        args = [x for x in cmd_args if '$' in x]
+    if message.content.startswith(bot_vars['callsign']):
+        cmd_args = message.content.replace(bot_vars['callsign'], 'py', 1).split()
+        cmd = '_'.join(cmd_args[0:2])
+        args = [x for x in cmd_args[2:len(cmd_args)]]
         for asd in args:
             args[args.index(asd)] = \
-                args[args.index(asd)].replace('$', '').replace('\\n', '\n').replace('\\t', '\t').replace('\\s',
-                                                                                                         '\u0020')
+                args[args.index(asd)].replace('\\n', '\n').replace('\\t', '\t').replace('\\s', '\u0020')
         return cmd, args
     else:
         return 'wrong_callsign', []
@@ -115,7 +114,7 @@ def load():
     except IOError:
         admin1, admin2 = config['GENERAL']['adminID'], config['GENERAL']['adminID2']
         __builtins__['bot_vars'] = {'ranks': {admin1: 512, admin2: 512}, 'allowed_channels': [],
-                                    'cmd_dict': {}, 'callsign': 'py'}
+                                    'cmd_dict': {}, 'callsign': 'py', 'cmd_list': []}
         save()
 
 

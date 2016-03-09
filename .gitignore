@@ -1,4 +1,5 @@
 *.ini
 *.pyc
 *.log
-*.pickle
+bot_vars.pickle
+pymod_oldShit/*

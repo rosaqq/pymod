@@ -5,7 +5,7 @@ import random
 
 class ReactionMod:
     rank = 100
-    help_dict = {'py_gif': 'ok I guess you can use this if you hate giphy or something'}
+    help_dict = {'py_gif': 'ok I guess you can use this if you hate giphy or something'}  # No idea why I made this or if it even works.
 
     def __init__(self, client, message):
         self.client = client

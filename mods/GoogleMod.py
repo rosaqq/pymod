@@ -10,7 +10,8 @@ class GoogleMod:
         self.client = client
         self.message = message
 
-    async def py_search(self, query):
+    async def py_search(self, *args):
+        query = '+'.join(args)
         base = "https://www.googleapis.com/customsearch/v1?cx=006104278528152025374%3Ar7ai6-zcpb4&key=AIzaSyANTJTh7HtxQvtPxCSNdNVyRiZWTWqLi94&q="
         with request.urlopen(base + query) as r:
             results = json.loads(r.read().decode(r.headers.get_content_charset('utf-8')))
