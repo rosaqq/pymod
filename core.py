@@ -6,24 +6,32 @@ from types import FunctionType
 import inspect
 import colorlog
 import logging
-# for erm... required init stuff... yes, python mandatory stuff that's it!
-# ----------------------------------------------------------------------------------------------------------------------
 import time
 
-year, month, day, hour, minute, a, b, c, d = time.localtime(time.time())
-platypus = str(year) + 'y' + str(month) + 'm' + str(day) + 'd' + str(hour) + str(minute) + 'h'
-
+# Console logging
+# ----------------------------------------------------------------------------------------------------------------------
 logger = colorlog.getLogger('discord')
 logger.setLevel(logging.DEBUG)
 handler = logging.StreamHandler(stream=sys.stdout)
-# handler = logging.FileHandler(filename=platypus + '.log', encoding='utf-8', mode='w')
-formatter = colorlog.ColoredFormatter(log_colors = {
-    'DEBUG': 'blue',
-    'INFO': 'green',
-    'WARNING': 'yellow',
-    'ERROR': 'red',
-    'CRITICAL': 'bold_red',
-})
+# Warning: there's a massive dump of shit in the console when it starts up
+formatter = colorlog.ColoredFormatter(
+    "%(log_color)s%(levelname)-8s%(reset)s %(message_log_color)s%(message)s",
+    log_colors = {
+        'DEBUG': 'blue',
+        'INFO': 'green',
+        'WARNING': 'yellow',
+        'ERROR': 'red',
+        'CRITICAL': 'bold_red, bg_white',
+    },
+    secondary_log_colors={
+        'message': {
+            'DEBUG': 'white',
+            'INFO': 'white',
+            'WARNING': 'yellow',
+            'ERROR':    'red',
+            'CRITICAL': 'red'
+        }
+    })
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
@@ -136,6 +144,8 @@ async def on_ready():
     print(client.user.name)
     print(client.user.id)
     print('------')
+    start_time = time.time()
+
 
 
 client.run(config['AUTH']['email'], config['AUTH']['pass'])

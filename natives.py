@@ -8,11 +8,11 @@ come, leave -> rank >= 25
 import pickle
 import configparser
 import os
-
+import sys
 
 class PycChannel:
     rank = 25
-    help_dict = {'py_come': 'bring pymod to channel', 'py_leave': 'remove pymod from channel'}
+    help_dict = {'py_come': 'bring 00Unit to channel', 'py_leave': 'remove 00Unit from channel'}
 
     def __init__(self, client, message):
         self.client = client
@@ -40,7 +40,8 @@ class PycChannel:
 class PycRoot:
     rank = 100
     help_dict = {'py_eval': 'chats eval(args)', 'py_aeval': 'awaits eval(args)', 'py_exec': 'exec(args)',
-                 'py_callme': 'sets callsign'}
+                 'py_callme': 'adds callsign', 'py_die': 'client.logout()', 'py_test': 'test stuff',
+                 'py_restart': 'broken atm', 'py_nocall': 'removes callsign'}
 
     def __init__(self, client, message):
         self.client = client
@@ -48,7 +49,7 @@ class PycRoot:
 
     async def py_eval(self, *args):
         try:
-            await self.client.send_message(self.message.channel, '```' + str(eval(' '.join(args))) + '```')
+            await self.client.send_message(self.message.channel, '```python\n' + str(eval(' '.join(args))) + '```')
         except Exception as lol:
             await self.client.send_message(self.message.channel, lol)
 
@@ -72,8 +73,27 @@ class PycRoot:
             await self.client.send_message(self.message.channel, lol)
 
     async def py_callme(self, callsign):
-        bot_vars['callsign'] = str(callsign)
-        await self.client.send_message(self.message.channel, 'new callsign: ' + str(callsign))
+        bot_vars['callsign'].append(str(callsign))
+        await self.client.send_message(self.message.channel, 'I will now respond to ' + str(callsign))
+
+    async def py_nocall(self, callsign):
+        if callsign in bot_vars['callsign']:
+            bot_vars['callsign'].remove(callsign)
+            await self.client.send_message(self.message.channel, 'I will no longer respond to ' + str(callsign))
+        else:
+            await self.client.send_message(self.message.channel, 'Nobody calls me that :R')
+
+    async def py_die(self):
+        await self.client.logout()
+
+    async def py_restart(self):
+        await self.client.logout()
+        await self.client.run(config['AUTH']['email'], config['AUTH']['pass']) # lol I wish it was this easy
+
+    async def py_test(self):
+        # Just putting this here so I can use it for debug/testing when I need it
+        # [5 minutes later:] just realised I could do this with eval... whatever it's staying
+        await self.client.send_message(self.message.channel, self.message.server.id)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -83,16 +103,17 @@ class PycRoot:
 # command parser
 # ----------------------------------------------------------------------------------------------------------------------
 def parse(message):
-    if message.content.startswith(bot_vars['callsign']):
-        cmd_args = message.content.replace(bot_vars['callsign'], 'py', 1).split()
-        cmd = '_'.join(cmd_args[0:2])
-        args = [x for x in cmd_args[2:len(cmd_args)]]
-        for asd in args:
-            args[args.index(asd)] = \
-                args[args.index(asd)].replace('\\n', '\n').replace('\\t', '\t').replace('\\s', '\u0020')
-        return cmd, args
-    else:
-        return 'wrong_callsign', []
+    for callsign in bot_vars['callsign']:
+        if message.content.startswith(callsign):
+            cmd_args = message.content.replace(callsign, 'py', 1).split()
+            cmd = '_'.join(cmd_args[0:2])
+            args = [x for x in cmd_args[2:len(cmd_args)]]
+            for asd in args:
+                args[args.index(asd)] = \
+                    args[args.index(asd)].replace('\\n', '\n').replace('\\t', '\t').replace('\\s', '\u0020')
+            return cmd, args
+        else:
+            return 'wrong_callsign', []
 
 
 # ------------------------------------------------------------------------------------------------------------------
