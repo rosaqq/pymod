@@ -9,6 +9,16 @@ import pickle
 import configparser
 import os
 import sys
+import time
+
+
+class RatelimitError(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
 
 class PycChannel:
     rank = 25
@@ -41,7 +51,7 @@ class PycRoot:
     rank = 100
     help_dict = {'py_eval': 'chats eval(args)', 'py_aeval': 'awaits eval(args)', 'py_exec': 'exec(args)',
                  'py_callme': 'adds callsign', 'py_die': 'client.logout()', 'py_test': 'test stuff',
-                 'py_restart': 'broken atm', 'py_nocall': 'removes callsign'}
+                 'py_restart': 'yeah I give up', 'py_nocall': 'removes callsign'}
 
     def __init__(self, client, message):
         self.client = client
@@ -87,8 +97,7 @@ class PycRoot:
         await self.client.logout()
 
     async def py_restart(self):
-        await self.client.logout()
-        await self.client.run(config['AUTH']['email'], config['AUTH']['pass']) # lol I wish it was this easy
+        pass
 
     async def py_test(self):
         # Just putting this here so I can use it for debug/testing when I need it
@@ -103,6 +112,18 @@ class PycRoot:
 # command parser
 # ----------------------------------------------------------------------------------------------------------------------
 def parse(message):
+    try:
+        ratelimit = bot_vars['ratelimit']
+    except KeyError:
+        bot_vars['ratelimit'] = 1.0
+        ratelimit = bot_vars['ratelimit']
+
+    try:
+        if time.time() - bot_vars['ratetime'] < ratelimit:
+            raise RatelimitError("2fast")
+    except KeyError:
+        bot_vars['ratetime'] = 0
+
     for callsign in bot_vars['callsign']:
         if message.content.startswith(callsign):
             cmd_args = message.content.replace(callsign, 'py', 1).split()
@@ -135,14 +156,13 @@ def load():
     except IOError:
         admin1, admin2 = config['GENERAL']['adminID'], config['GENERAL']['adminID2']
         __builtins__['bot_vars'] = {'ranks': {admin1: 512, admin2: 512}, 'allowed_channels': [],
-                                    'cmd_dict': {}, 'callsign': 'py', 'cmd_list': []}
+                                    'cmd_dict': {}, 'callsign': 'py', 'cmd_list': [], 'ratelimit': 1.0, 'ratetime': 0}
         save()
 
 
 def reset():
     os.remove('bot_vars.pickle')
     load()
-
 
 config = configparser.ConfigParser()
 config.read('pymod.ini')

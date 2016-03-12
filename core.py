@@ -10,6 +10,7 @@ import time
 
 # Console logging
 # ----------------------------------------------------------------------------------------------------------------------
+
 logger = colorlog.getLogger('discord')
 logger.setLevel(logging.DEBUG)
 handler = logging.StreamHandler(stream=sys.stdout)
@@ -81,6 +82,12 @@ load_modules()
 
 @client.event
 async def on_message(message):
+    if message.content.lower() == "ako pls":
+        try:
+            bot_vars['akopls'] += 1
+        except KeyError:
+            bot_vars['akopls'] = 1
+
     cmd, args = natives.parse(message)
     helpcmd = False
     helplist = {}

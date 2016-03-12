@@ -30,10 +30,8 @@ class UserMod:
             else:
                 await self.client.send_message(self.message.channel, 'Your rank is: 0')
         else:
-            if self.message.author.id in bot_vars['ranks']:
-                a = user.replace('<@', '')
-                user_id = a.replace('>', '')
-                msg = user + "'s rank is: " + str(bot_vars['ranks'][user_id])
+            if user.replace("<@", "").replace(">", "") in bot_vars['ranks']:
+                msg = user + "'s rank is: " + str(bot_vars['ranks'][user.replace("<@", "").replace(">", "")])
                 await self.client.send_message(self.message.channel, msg)
             else:
-                await self.client.send_message(self.message.channel, 'Your rank is: 0')
+                await self.client.send_message(self.message.channel, user + "'s rank is: 0")

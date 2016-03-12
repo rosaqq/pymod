@@ -13,11 +13,11 @@ class PickleMod:
         self.message = message
         self.folder = 'pickles'
 
-    async def py_pickle(self, file, someth):
+    async def py_pickle(self, file, *args):
         if not os.path.exists(self.folder):
             os.makedirs(self.folder)
         with open(self.folder + '/' + file + '.pickle', 'wb') as notes:
-            pickle.dump(someth, notes)
+            pickle.dump(" ".join(args), notes)
             notes.close()
             await self.client.send_message(self.message.channel, 'pickled')
 
