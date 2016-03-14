@@ -12,15 +12,6 @@ class PingMod:
 
     async def py_ping(self):
         await self.client.send_message(self.message.channel, 'pong')
-        async def pong(msg):
-            if msg.content == "Pong" and msg.author == self.bot.user:
-                await self.client.send_message(msg.channel, ":thumbsup: Delay: " + str(round(time.time()*1000) - now) + "ms")
-                self.client.remove_listener(pong, name="on_message")
-
-        now = round(time.time()*1000)
-        self.client.add_listener(pong, name="on_message")
-        await self.client.say("Pong")
-        self.client.remove_listener(pong, name="on_message")
 
     async def py_doot(self):
         await self.client.send_message(self.message.channel, '🎺           🎺 🎺            🎺🎺 🎺🎺')

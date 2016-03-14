@@ -7,34 +7,35 @@ import inspect
 import colorlog
 import logging
 import time
+from colored import fg, bg, attr
 
 # Console logging
 # ----------------------------------------------------------------------------------------------------------------------
 
-logger = colorlog.getLogger('discord')
-logger.setLevel(logging.DEBUG)
-handler = logging.StreamHandler(stream=sys.stdout)
-# Warning: there's a massive dump of shit in the console when it starts up
-formatter = colorlog.ColoredFormatter(
-    "%(log_color)s%(levelname)-8s%(reset)s %(message_log_color)s%(message)s",
-    log_colors = {
-        'DEBUG': 'blue',
-        'INFO': 'green',
-        'WARNING': 'yellow',
-        'ERROR': 'red',
-        'CRITICAL': 'bold_red, bg_white',
-    },
-    secondary_log_colors={
-        'message': {
-            'DEBUG': 'white',
-            'INFO': 'white',
-            'WARNING': 'yellow',
-            'ERROR':    'red',
-            'CRITICAL': 'red'
-        }
-    })
-handler.setFormatter(formatter)
-logger.addHandler(handler)
+# logger = colorlog.getLogger('discord')
+# logger.setLevel(logging.DEBUG)
+# handler = logging.StreamHandler(stream=sys.stdout)
+# # Warning: there's a massive dump of shit in the console when it starts up
+# formatter = colorlog.ColoredFormatter(
+#     "%(log_color)s%(levelname)-8s%(reset)s %(message_log_color)s%(message)s",
+#     log_colors = {
+#         'DEBUG': 'blue',
+#         'INFO': 'green',
+#         'WARNING': 'yellow',
+#         'ERROR': 'red',
+#         'CRITICAL': 'bold_red, bg_white',
+#     },
+#     secondary_log_colors={
+#         'message': {
+#             'DEBUG': 'white',
+#             'INFO': 'white',
+#             'WARNING': 'yellow',
+#             'ERROR':    'red',
+#             'CRITICAL': 'red'
+#         }
+#     })
+# handler.setFormatter(formatter)
+# logger.addHandler(handler)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -82,11 +83,13 @@ load_modules()
 
 @client.event
 async def on_message(message):
-    if message.content.lower() == "ako pls":
+    if "ako pls" in message.content.lower():
+        # print("%s" + time.strftime("%Y-%m-%d %H:%M:%S") + " AKOPLS: " + message.author.name + "| akopls incremented%s" % (fg(2), attr(0)))
         try:
             bot_vars['akopls'] += 1
         except KeyError:
             bot_vars['akopls'] = 1
+
 
     cmd, args = natives.parse(message)
     helpcmd = False
@@ -109,10 +112,17 @@ async def on_message(message):
                 if cmd in bot_vars['natives'][key]:
                     if user_rank >= eval('natives.' + key + '.rank'):
                         exec('a = natives.' + key + '(client, message)')
+                        print("\x1b[38;5;#008080m" + "{}{:>20}{:<10}{}{:<15}{}{}".format(time.strftime("%Y-%m-%d %H:%M:%S"), " NATIVE_SUCCESS: ", message.author.name[:10], "| Channel: ", message.channel.name[:15], "| Msg: ", message.content) + "\x1b[0m")
                         await eval('a.' + cmd + '(*args)')
+                        # print("%s" % (fg(2)) + time.strftime("%Y-%m-%d %H:%M:%S") + " NATIVE_SUCCESS: " + message.author.name + "| command executed: " + cmd + " with args: " + " ".join(args) + "%s" % (attr(0)))
+
                     else:
+                        print("\x1b[38;5;#800000m" + "{}{:>20}{:<10}{}{:<15}{}{}".format(time.strftime("%Y-%m-%d %H:%M:%S"), " NATIVE_DENY: ", message.author.name[:10], "| Channel: ", message.channel.name[:15], "| Msg: ", message.content) + "\x1b[0m")
                         await client.send_message(message.channel, 'permission denied')
+                        # print("%s" % (fg(1)) + time.strftime("%Y-%m-%d %H:%M:%S") + " NATIVE_DENY: " + message.author.name + "| command NOT executed: " + cmd + " with args: " + " ".join(args) + "%s" % (attr(0)))
+
                 elif cmd == 'py_help':
+                    print("%s" % (fg(2)) + time.strftime("%Y-%m-%d %H:%M:%S") + " HELP: " + message.author.name + "| command executed: " + cmd + " with args: " + " ".join(args) + "%s" % (attr(0)))
                     helpcmd = True
                     if user_rank >= eval('natives.' + key + '.rank'):
                         for func in bot_vars['natives'][key]:
@@ -122,9 +132,15 @@ async def on_message(message):
                 if cmd in bot_vars['cmd_dict'][key]:
                     if user_rank >= eval(key + '.rank'):
                         exec('a = ' + key + '(client, message)')
+                        print("\x1b[38;5;#008080m" + "{}{:>20}{:<10}{}{:<15}{}{}".format(time.strftime("%Y-%m-%d %H:%M:%S"), " MOD_SUCCESS: ", message.author.name[:10], "| Channel: ", message.channel.name[:15], "| Msg: ", message.content) + "\x1b[0m")
                         await eval('a.' + cmd + '(*args)')
+                        # print("%s" % (fg(2)) + time.strftime("%Y-%m-%d %H:%M:%S") + " MOD_SUCCESS: " + message.author.name + "| command executed: " + cmd + " with args: " + " ".join(args) + "%s" % (attr(0)))
+
                     else:
+                        print("\x1b[38;5;#800000m" + "{}{:>20}{:<10}{}{:<15}{}{}".format(time.strftime("%Y-%m-%d %H:%M:%S"), " MOD_DENY: ", message.author.name[:10], "| Channel: ", message.channel.name[:15], "| Msg: ", message.content) + "\x1b[0m")
                         await client.send_message(message.channel, 'permission denied')
+                        # print("%s" % (fg(1)) + time.strftime("%Y-%m-%d %H:%M:%S") + " MOD_DENY: " + message.author.name + "| command NOT executed: " + cmd + " with args: " + " ".join(args) + "%s" % (attr(0)))
+
                 elif cmd == 'py_help':
                     helpcmd = True
                     if user_rank >= eval(key + '.rank'):
@@ -140,7 +156,14 @@ async def on_message(message):
 
         except Exception as retard:
             msg = 'Something went wrong:\n' + str(retard)
+            print("\x1b[38;5;#ffffffm\x1b[48;5;#800000m" + "{}{:>20}{:<10}{}{:<15}{}{}".format(time.strftime("%Y-%m-%d %H:%M:%S"), " EXCEPTION: ", message.author.name[:10], "| Channel: ", message.channel.name[:15], "| Msg: ", message.content) + "\x1b[0m")
             await client.send_message(message.channel, msg)
+            # print("%s%s" % (fg(6), bg(1)) + time.strftime("%Y-%m-%d %H:%M:%S") + " EXCEPTION: " + message.author.name + "| command execpted: " + cmd + " with args: " + " ".join(args) + "%s" % (attr(0)))
+
+    if message.channel.id in bot_vars['allowed_channels'] and not message.content.lower().startswith("00") and message.author != client.user:
+        print("\x1b[38;5;#008080m" + "{}{:>20}{:<10}{}{:<15}{}{}".format(time.strftime("%Y-%m-%d %H:%M:%S"), " LISTEN_MSG: ", message.author.name[:10], "| Channel: ", message.channel.name[:15], "| Msg: ", message.content) + "\x1b[0m")
+    elif not (cmd == 'py_come' or cmd == 'py_leave' or message.channel.id in bot_vars['allowed_channels']) and message.author != client.user:
+        print("\x1b[38;5;#808000m" + "{}{:>20}{:<10}{}{:<15}{}{}".format(time.strftime("%Y-%m-%d %H:%M:%S"), " NON_LISTEN_MSG: ", message.author.name[:10], "| Channel: ", message.channel.name[:15], "| Msg: ", message.content) + "\x1b[0m")
 
     natives.save()
 

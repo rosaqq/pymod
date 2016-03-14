@@ -12,14 +12,6 @@ import sys
 import time
 
 
-class RatelimitError(Exception):
-    def __init__(self, value):
-        self.value = value
-
-    def __str__(self):
-        return repr(self.value)
-
-
 class PycChannel:
     rank = 25
     help_dict = {'py_come': 'bring 00Unit to channel', 'py_leave': 'remove 00Unit from channel'}
@@ -41,6 +33,27 @@ class PycChannel:
             await self.client.send_message(self.message.channel, "channel disabled")
         else:
             await self.client.send_message(self.message.channel, "channel already disabled")
+
+class PycCustom:
+    rank = 0
+    help_dict = {'py_add': 'Add a custom command', 'py_rem': 'remove a custom command', 'py_customlist':
+                 'list custom commands'}
+
+    def __init__(self, client, message):
+        self.client = client
+        self.message = message
+
+    async def py_add(self, name, *cmd):
+        try:
+            bot_vars['custom_cmds'] =  {name: " ".join(cmd)}
+        except KeyError:
+            await self.client.send_message(self.message.channel, "I'm too tired to figure out why this would break rn")
+
+    async def py_rem(self, name):  # TODO: rest of PycCustom
+        pass
+
+    async def py_customlist(self):
+        pass
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -118,14 +131,17 @@ def parse(message):
         bot_vars['ratelimit'] = 1.0
         ratelimit = bot_vars['ratelimit']
 
-    try:
-        if time.time() - bot_vars['ratetime'] < ratelimit:
-            raise RatelimitError("2fast")
-    except KeyError:
-        bot_vars['ratetime'] = 0
 
     for callsign in bot_vars['callsign']:
         if message.content.startswith(callsign):
+            try:
+                if time.time() - bot_vars['ratetime'] < ratelimit:
+                    print("\x1b[38;5;#008080m" + "{}{:>20}{:<10}{}{:<15}{}{}".format(time.strftime("%Y-%m-%d %H:%M:%S"), " RATELIMIT: ", message.author.name[:10], "| Channel: ", message.channel.name[:15], "| Msg: ", message.content) + "\x1b[0m")
+                    return 'ratelimit', []
+            except KeyError:
+                bot_vars['ratetime'] = 0
+
+            bot_vars['ratetime'] = time.time()
             cmd_args = message.content.replace(callsign, 'py', 1).split()
             cmd = '_'.join(cmd_args[0:2])
             args = [x for x in cmd_args[2:len(cmd_args)]]

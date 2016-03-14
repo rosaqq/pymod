@@ -5,7 +5,8 @@ import humanfriendly
 class GoogleBlacklistMod:
     rank = 100
     help_dict = {'py_addblacklist': 'add to the search blacklist', 'py_blacklist': 'prints blacklist',
-                 'py_remblacklist': 'remove from search blacklist', 'py_replaceblacklist': 'replace entire blacklist'}
+                 'py_remblacklist': 'remove from search blacklist', 'py_replaceblacklist': 'replace entire blacklist',
+                 'py_filter': 'turns NSFW filter off/on'}
     global blacklist
     try:
         with open('blacklist.pickle', 'rb') as save_file:
