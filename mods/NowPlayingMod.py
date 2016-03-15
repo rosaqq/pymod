@@ -1,6 +1,6 @@
 import discord
 class NowPlayingMod:
-    rank = 100
+    rank = 75
     help_dict = {'py_np': 'changes "Playing:" message'}
 
     def __init__(self, client, message):

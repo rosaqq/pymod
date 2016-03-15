@@ -4,7 +4,7 @@ import asyncio
 class PingMod:
     rank = 0
     help_dict = {'py_ping': 'try and guess', 'py_doot': '🎺', 'py_chomp': '2meme', 'py_pls': ':/', 'py_bestmod': 'beno',
-                 'py_picklepls': 'pickle, pls'}
+                 'py_picklepls': 'pickle, pls', 'py_secondbestmod': 'Ako, duh'}
 
     def __init__(self, client, message):
         self.client = client
@@ -31,3 +31,7 @@ class PingMod:
 
     async def py_picklepls(self):
         await self.client.send_message(self.message.channel, 'https://i.imgur.com/5NX0Wnk.png')
+
+    async def py_secondbestmod(self):
+        await self.client.send_message(self.message.channel, 'Everyone knows Ako is second best mod')
+
