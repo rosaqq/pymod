@@ -73,52 +73,47 @@ async def on_message(message):
         except KeyError:
             user_rank = 0
 
-        # I need this because. Just because.
-        if False:
-            pass
-
-        else:
-            try:
-                # check if cmd in natives
-                for key in bot_vars['natives']:
-                    if cmd in bot_vars['natives'][key]:
-                        if user_rank >= eval('natives.' + key + '.rank'):
-                            exec('a = natives.' + key + '(client, message)')
-                            await eval('a.' + cmd + '(*args)')
-                        else:
-                            await client.send_message(message.channel, 'permission denied')
-                    elif cmd == 'py_help':
-                        helpcmd = True
-                        if user_rank >= eval('natives.' + key + '.rank'):
-                            for func in bot_vars['natives'][key]:
+        try:
+            # check if cmd in natives
+            for key in bot_vars['natives']:
+                if cmd in bot_vars['natives'][key]:
+                    if user_rank >= eval('natives.' + key + '.rank'):
+                        exec('a = natives.' + key + '(client, message)')
+                        await eval('a.' + cmd + '(*args)')
+                    else:
+                        await client.send_message(message.channel, 'permission denied')
+                elif cmd == 'py_help':
+                    helpcmd = True
+                    if user_rank >= eval('natives.' + key + '.rank'):
+                        for func in bot_vars['natives'][key]:
                                 helplist[func] = eval('natives.' + key + '.help_dict[func]')
-                # check in modules
-                for key in bot_vars['cmd_dict']:
-                    if cmd in bot_vars['cmd_dict'][key]:
-                        if user_rank >= eval(key + '.rank'):
-                            exec('a = ' + key + '(client, message)')
-                            await eval('a.' + cmd + '(*args)')
-                        else:
-                            await client.send_message(message.channel, 'permission denied')
-                    elif cmd == 'py_help':
-                        helpcmd = True
-                        if user_rank >= eval(key + '.rank'):
-                            for func in bot_vars['cmd_dict'][key]:
-                                helplist[func] = helplist[func] = eval(key + '.help_dict[func]')
-                if helpcmd:
-                    helpmsg = []
-                    for func in helplist:
-                        helpmsg.append(func + ': ' + helplist[func])
-                    msg = 'Available commands are: ```\n' + '\n'.join(helpmsg) + '```\nUse $x in the command to pass ' \
+            # check in modules
+            for key in bot_vars['cmd_dict']:
+                if cmd in bot_vars['cmd_dict'][key]:
+                    if user_rank >= eval(key + '.rank'):
+                        exec('a = ' + key + '(client, message)')
+                        await eval('a.' + cmd + '(*args)')
+                    else:
+                        await client.send_message(message.channel, 'permission denied')
+                elif cmd == 'py_help':
+                    helpcmd = True
+                    if user_rank >= eval(key + '.rank'):
+                        for func in bot_vars['cmd_dict'][key]:
+                            helplist[func] = helplist[func] = eval(key + '.help_dict[func]')
+            if helpcmd:
+                helpmsg = []
+                for func in helplist:
+                    helpmsg.append(func + ': ' + helplist[func])
+                msg = 'Available commands are: ```\n' + '\n'.join(helpmsg) + '```\nUse $x in the command to pass ' \
                                                                                  'parameter x to a function that' \
                                                                                  ' requires it.\n( _ represents a ' \
                                                                                  'space and "py" should be replaced ' \
                                                                                  'by the current callsign)'
-                    await client.send_message(message.author, msg)
+                await client.send_message(message.author, msg)
 
-            except Exception as retard:
-                msg = 'Something went wrong:\n' + str(retard)
-                await client.send_message(message.channel, msg)
+        except Exception as retard:
+            msg = 'Something went wrong:\n' + str(retard)
+            await client.send_message(message.channel, msg)
 
     natives.save()
 
