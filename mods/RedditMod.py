@@ -17,10 +17,13 @@ class RedditMod:
         posts = list(posts)
         done = False
         for post in posts:
-            if not done and not post.is_self and (filter and not post.over_18 or not filter) and "spoiler" not in post.link_flair_text and (('gyfcat' or '.png' or '.jpg' or '.jpeg' or '.gif' or '.gfy') in post.url):
+            if not done and not post.is_self and (filter and not post.over_18 or not filter) and "spoiler" not in post.link_flair_text and (('gyfcat' or '.png' or '.jpg' or '.jpeg' or '.gif' or '.gfy') in post.url):  # TODO: maybe check headers instead, idk.
                 await self.client.send_message(self.message.channel, "**Title**: " + post.title + "\n**Reddit Link**: " + post.short_link + "\n" + post.url)
+                done = True
+        if not done:
+            await self.client.send_message(self.message.channel, "<@" + self.message.author.id + "> I couldn't find anything for you :/")
 
 
 
     async def py_r(self, sub):
-        self.py_reddit(sub)
+        await self.py_reddit(sub)
