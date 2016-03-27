@@ -4,7 +4,7 @@ import json
 
 class GoogleMod:
     rank = 0
-    help_dict = {'py_search': 'search google'}
+    help_dict = {'py_search': 'search google', 'py_g': 'search google, alias for search command'}
     global blacklist
     blacklist = __import__('GoogleBlacklistMod').blacklist
 
@@ -42,3 +42,6 @@ class GoogleMod:
                 raise Exception("Blacklisted term in search result: " + errterm)
         else:
             await self.client.send_message(self.message.channel, "Couldn't find anything ;-;")
+
+    async def py_g(self, *args):
+        self.py_search(args)
