@@ -3,7 +3,7 @@ import humanfriendly
 
 
 class GoogleBlacklistMod:
-    rank = 100
+    rank = 75
     help_dict = {'py_addblacklist': 'add to the search blacklist', 'py_blacklist': 'prints blacklist',
                  'py_remblacklist': 'remove from search blacklist', 'py_replaceblacklist': 'replace entire blacklist',
                  'py_filter': 'turns NSFW filter off/on'}

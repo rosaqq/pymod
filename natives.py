@@ -107,6 +107,7 @@ class PycRoot:
             await self.client.send_message(self.message.channel, 'Nobody calls me that :R')
 
     async def py_die(self):
+        await self.client.send_message(self.message.channel, "Bye-bye")
         await self.client.logout()
 
     async def py_restart(self):
@@ -136,8 +137,9 @@ def parse(message):
         if message.content.startswith(callsign):
             try:
                 if time.time() - bot_vars['ratetime'] < ratelimit:
-                    print("\x1b[38;5;#008080m" + "{}{:>20}{:<10}{}{:<15}{}{}".format(time.strftime("%Y-%m-%d %H:%M:%S"), " RATELIMIT: ", message.author.name[:10], "| Channel: ", message.channel.name[:15], "| Msg: ", message.content) + "\x1b[0m")
-                    return 'ratelimit', []
+                    print("{}{:>20}{:<10}{}{:<15}{}{}".format(time.strftime("%Y-%m-%d %H:%M:%S"), " RATELIMIT: ", message.author.name[:10], "| Channel: ", message.channel.name[:15], "| Msg: ", message.content))
+                    if message.author.id != "132694825454665728":
+                        return 'ratelimit', []
             except KeyError:
                 bot_vars['ratetime'] = 0
 
