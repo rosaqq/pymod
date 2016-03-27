@@ -91,6 +91,7 @@ async def on_message(message):
             bot_vars['akopls'] = 1
 
     if "00 uptime" in message.content.lower():
+        # Kinda hijacked this because I couldn't figure out a way to get bot_vars from a mod file, lol
         await client.send_message(message.channel, "Uptime: {0:.2f} seconds".format((time.time() - bot_vars['start_time'])))
     cmd, args = natives.parse(message)
     helpcmd = False
