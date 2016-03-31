@@ -2,3 +2,4 @@
 *.pyc
 *.log
 pymod_oldShit/*
+*.pickle

@@ -132,7 +132,7 @@ async def on_message(message):
                     if user_rank >= eval('natives.' + key + '.rank'):
                         for func in bot_vars['natives'][key]:
                             helplist[func] = eval('natives.' + key + '.help_dict[func]')
-                            helplist[func] += " rank: " + eval('natives.' + key + '.rank')
+                            helplist[func] += " rank: " + str(eval('natives.' + key + '.rank'))
             # check in modules
             for key in bot_vars['cmd_dict']:
                 if cmd in bot_vars['cmd_dict'][key]:
@@ -152,7 +152,7 @@ async def on_message(message):
                     if user_rank >= eval(key + '.rank'):
                         for func in bot_vars['cmd_dict'][key]:
                             helplist[func] = eval(key + '.help_dict[func]')
-                            helplist[func] += " rank: " + eval(key + '.rank')
+                            helplist[func] += " rank: " + str(eval(key + '.rank'))
 
             if helpcmd:
                 helpmsg = []
