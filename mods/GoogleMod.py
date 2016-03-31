@@ -44,4 +44,4 @@ class GoogleMod:
             await self.client.send_message(self.message.channel, "Couldn't find anything ;-;")
 
     async def py_g(self, *args):
-        await self.py_search(args)
+        raise Exception("it's broken")
