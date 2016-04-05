@@ -116,7 +116,7 @@ class PycRoot:
     async def py_test(self):
         # Just putting this here so I can use it for debug/testing when I need it
         # [5 minutes later:] just realised I could do this with eval... whatever it's staying
-        await self.client.send_message(self.message.channel, self.message.server.id)
+        await self.client.send_message(self.message.channel, "@everyone")
 
 
 # ----------------------------------------------------------------------------------------------------------------------
