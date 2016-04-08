@@ -2,7 +2,7 @@ import random
 
 class FlipMod:
     rank = 0
-    help_dict = {'py_flip': 'seperated by space', 'py fiip': 'shh'}
+    help_dict = {'py_flip': 'seperated by space', 'py_fiip': 'shh'}
 
     def __init__(self, client, message):
         self.client = client
