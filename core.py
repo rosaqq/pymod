@@ -159,7 +159,7 @@ async def on_message(message):
                 for func in helplist:
                     helpmsg.append(func.replace("py", "00", 1) + ': ' + helplist[func])
                 msg = 'Available commands are: ```\n' + '\n'.join(helpmsg) + '```'
-                await client.send_message(message.author, msg)
+                await safe_send(message.author, msg)
                 await client.send_message(message.channel, "<@" + message.author.id + "> Check your DMs for help")
 
         except Exception as retard:
@@ -174,6 +174,16 @@ async def on_message(message):
         print("{}{:>20}{:<10}{}{:<15}{}{}".format(time.strftime("%Y-%m-%d %H:%M:%S"), " NON_LISTEN_MSG: ", message.author.name[:10], "| Channel: ", message.channel.name[:15], "| Msg: ", message.content))
 
     natives.save()
+
+async def safe_send(channel, message):
+    if len(message) < 1990:
+        await client.send_message(channel, message)
+    else:
+        while len(message) > 1990 and message.rfind("\n", 0, 1990) != -1:
+            inx = message.rfind("\n", 0, 1990)
+            await client.send_message(channel, message[:inx])
+            message = message[inx:]
+        await client.send_message(channel, message)
 
 
 @client.event
