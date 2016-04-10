@@ -196,4 +196,4 @@ async def on_ready():
 
 
 
-client.run(config['AUTH']['email'], config['AUTH']['pass'])
+client.run(config['AUTH']['token'])
