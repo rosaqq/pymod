@@ -2,7 +2,7 @@ import random
 
 class FlipMod:
     rank = 0
-    help_dict = {'py_flip': 'seperated by space', 'py_fiip': 'shh'}
+    help_dict = {'py_flip': 'seperated by space', 'py_fIip': 'shh'}
 
     def __init__(self, client, message):
         self.client = client
@@ -11,5 +11,5 @@ class FlipMod:
     async def py_flip(self, *args):
         await self.client.send_message(self.message.channel, random.choice(args))
 
-    async def py_fiip(self, *args):
+    async def py_fIip(self, *args):
         await self.client.send_message(self.message.channel, args[0])
