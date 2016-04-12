@@ -1,4 +1,4 @@
-class ModertationMod:
+class ModerationMod:
     rank = 100
     help_dict = {'py_purge': 'deletes <num> messages from [mention] user'}
 
