@@ -10,4 +10,15 @@ class ModerationMod:
         if self.message.mentions:
             msgs = [m for m in self.client.messages if m.author in self.message.mentions and m.channel == self.message.channel]
             for i in range(int(num)):
-                await self.client.delete_message(msgs[i])
+                try:
+                    await self.client.delete_message(msgs[i])
+                except IndexError:
+                    pass
+
+        else:
+            msgs = [m for m in self.client.messages if m.channel == self.message.channel]
+            for i in range(int(num)):
+                try:
+                    await self.client.delete_message(msgs[i])
+                except IndexError:
+                    pass
