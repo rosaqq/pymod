@@ -61,7 +61,7 @@ class PycCustom:
 
 
 class PycRoot:
-    rank = 100
+    rank = 510
     help_dict = {'py_eval': 'chats eval(args)', 'py_aeval': 'awaits eval(args)', 'py_exec': 'exec(args)',
                  'py_callme': 'adds callsign', 'py_die': 'client.logout()', 'py_test': 'test stuff',
                  'py_restart': 'yeah I give up', 'py_nocall': 'removes callsign'}
