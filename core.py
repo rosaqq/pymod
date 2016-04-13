@@ -163,10 +163,16 @@ async def on_message(message):
                 await client.send_message(message.channel, "<@" + message.author.id + "> Check your DMs for help")
 
         except Exception as e:
-            msg = str(e.__type__) + ": " + str(e)
-            print("{}{:>20}{:<10}{}{:<15}{}{}{}{}".format(time.strftime("%Y-%m-%d %H:%M:%S"), " EXCEPTION: ", message.author.name[:10], "| Channel: ", message.channel.name[:15], "| Msg: ", message.content, "| ErrorMsg: ", msg))
-            await client.send_message(message.channel, msg)
-            # print("%s%s" % (fg(6), bg(1)) + time.strftime("%Y-%m-%d %H:%M:%S") + " EXCEPTION: " + message.author.name + "| command execpted: " + cmd + " with args: " + " ".join(args) + "%s" % (attr(0)))
+            try:
+                msg = str(e.__type__) + ": " + str(e)
+                print("{}{:>20}{:<10}{}{:<15}{}{}{}{}".format(time.strftime("%Y-%m-%d %H:%M:%S"), " EXCEPTION: ", message.author.name[:10], "| Channel: ", message.channel.name[:15], "| Msg: ", message.content, "| ErrorMsg: ", msg))
+                await client.send_message(message.channel, msg)
+            except AttributeError:
+                msg = "Exception: " + str(e)
+                print("{}{:>20}{:<10}{}{:<15}{}{}{}{}".format(time.strftime("%Y-%m-%d %H:%M:%S"), " EXCEPTION: ",
+                                                              message.author.name[:10], "| Channel: ", message.channel.name[:15],
+                                                              "| Msg: ", message.content, "| ErrorMsg: ", msg))
+                await client.send_message(message.channel, msg)
 
     if message.channel.id in bot_vars['allowed_channels'] and not message.content.lower().startswith("00") and message.author != client.user:
         print("{}{:>20}{:<10}{}{:<15}{}{}".format(time.strftime("%Y-%m-%d %H:%M:%S"), " LISTEN_MSG: ", message.author.name[:10], "| Channel: ", message.channel.name[:15], "| Msg: ", message.content))
