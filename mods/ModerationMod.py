@@ -6,7 +6,7 @@ class ModerationMod:
         self.client = client
         self.message = message
 
-    async def py_purge(self, num):
+    async def py_purge(self, num, user=None):
         if self.message.mentions:
             msgs = [m for m in self.client.logs_from(self.message.channel) if m.author in self.message.mentions and m is not self.message][::-1]
             for i in range(int(num)):
