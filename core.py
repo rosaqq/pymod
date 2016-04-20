@@ -98,7 +98,7 @@ async def on_message(message):
     helplist = {}
 
     for cmd in bot_vars['custom_cmds']:
-        if check(bot_vars['callsign'], message.content.lower()) and cmd in message.content.lower():
+        if check(bot_vars['callsign'], message.content.lower()) and cmd in ' '.split(message.content.lower()):
             await client.send_message(message.channel, bot_vars['custom_cmds'][cmd])
 
     if cmd == 'ratelimit' and (cmd == 'py_come' or message.channel.id in bot_vars['allowed_channels']):
