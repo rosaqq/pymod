@@ -45,9 +45,9 @@ class PycCustom:
 
     async def py_add(self, name, *cmd):
         try:
-            bot_vars['custom_cmds'] = {name: " ".join(cmd)}
+            bot_vars['custom_cmds'][name] = " ".join(cmd)
         except KeyError:
-            await self.client.send_message(self.message.channel, "I'm too tired to figure out why this would break rn")
+            bot_vars['custom_cmds'] = {name: " ".join(cmd)}
 
     async def py_rem(self, name):  # TODO: rest of PycCustom
         try:
