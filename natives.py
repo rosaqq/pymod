@@ -35,7 +35,7 @@ class PycChannel:
             await self.client.send_message(self.message.channel, "channel already disabled")
 
 class PycCustom:
-    rank = 0
+    rank = 50
     help_dict = {'py_add': 'Add a custom command', 'py_rem': 'remove a custom command', 'py_customlist':
                  'list custom commands'}
 
@@ -45,15 +45,18 @@ class PycCustom:
 
     async def py_add(self, name, *cmd):
         try:
-            bot_vars['custom_cmds'] =  {name: " ".join(cmd)}
+            bot_vars['custom_cmds'] = {name: " ".join(cmd)}
         except KeyError:
             await self.client.send_message(self.message.channel, "I'm too tired to figure out why this would break rn")
 
     async def py_rem(self, name):  # TODO: rest of PycCustom
-        pass
+        try:
+            del bot_vars['custom_cmds'][name]
+        except KeyError:
+            await self.client.send_message(self.message.channel, "Error removing command: Command Not Found")
 
     async def py_customlist(self):
-        pass
+        await safe_send(self.message.channel, "\n".join(bot_vars['custom_cmds']))
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -63,8 +66,7 @@ class PycCustom:
 class PycRoot:
     rank = 510
     help_dict = {'py_eval': 'chats eval(args)', 'py_aeval': 'awaits eval(args)', 'py_exec': 'exec(args)',
-                 'py_callme': 'adds callsign', 'py_die': 'client.logout()', 'py_test': 'test stuff',
-                 'py_restart': 'yeah I give up', 'py_nocall': 'removes callsign'}
+                 'py_callme': 'adds callsign', 'py_die': 'client.logout()', 'py_nocall': 'removes callsign'}
 
     def __init__(self, client, message):
         self.client = client
@@ -110,17 +112,20 @@ class PycRoot:
         await self.client.send_message(self.message.channel, "Bye-bye")
         await self.client.logout()
 
-    async def py_restart(self):
-        pass
-
-    async def py_test(self):
-        # Just putting this here so I can use it for debug/testing when I need it
-        # [5 minutes later:] just realised I could do this with eval... whatever it's staying
-        await self.client.send_message(self.message.channel, "@everyone")
-
 
 # ----------------------------------------------------------------------------------------------------------------------
 # end of Root class
+
+
+async def safe_send(channel, message):
+    if len(message) < 1990:
+        await client.send_message(channel, message)
+    else:
+        while len(message) > 1990 and message.rfind("\n", 0, 1990) != -1:
+            inx = message.rfind("\n", 0, 1990)
+            await client.send_message(channel, message[:inx])
+            message = message[inx:]
+        await client.send_message(channel, message)
 
 
 # command parser

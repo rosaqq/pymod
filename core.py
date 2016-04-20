@@ -97,6 +97,10 @@ async def on_message(message):
     helpcmd = False
     helplist = {}
 
+    for cmd in bot_vars['custom_cmds']:
+        if any(bot_vars['callsign']) + cmd in message.content.lower():
+            await client.send_message(message.channel, bot_vars['custom_cmds'][cmd])
+
     if cmd == 'ratelimit' and (cmd == 'py_come' or message.channel.id in bot_vars['allowed_channels']):
          print("{}{:>20}{:<10}{}{:<15}{}{}".format(time.strftime("%Y-%m-%d %H:%M:%S"), " RATELIMIT: ", message.author.name[:10], "| Channel: ", message.channel.name[:15], "| Msg: ", message.content))
 
