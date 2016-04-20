@@ -97,10 +97,6 @@ async def on_message(message):
     helpcmd = False
     helplist = {}
 
-    for cmd in bot_vars['custom_cmds']:
-        if check(bot_vars['callsign'], message.content.lower()) and cmd in ' '.split(message.content.lower()):
-            await client.send_message(message.channel, bot_vars['custom_cmds'][cmd])
-
     if cmd == 'ratelimit' and (cmd == 'py_come' or message.channel.id in bot_vars['allowed_channels']):
          print("{}{:>20}{:<10}{}{:<15}{}{}".format(time.strftime("%Y-%m-%d %H:%M:%S"), " RATELIMIT: ", message.author.name[:10], "| Channel: ", message.channel.name[:15], "| Msg: ", message.content))
 
@@ -109,6 +105,11 @@ async def on_message(message):
             user_rank = bot_vars['ranks'][message.author.id]
         except KeyError:
             user_rank = 0
+
+        for cmd in bot_vars['custom_cmds']:
+            #idk what I'm doing anymore
+            if "00 "+cmd == message.content.lower():
+                await client.send_message(message.channel, bot_vars['custom_cmds'][cmd])
 
         # # I need this because. Just because.
         # if False:
