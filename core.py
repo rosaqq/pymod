@@ -98,7 +98,7 @@ async def on_message(message):
     helplist = {}
 
     for cmd in bot_vars['custom_cmds']:
-        if any(bot_vars['callsign'] in message.content.lower()) and cmd in message.content.lower():
+        if check(bot_vars['callsign'], message.content.lower()) and cmd in message.content.lower():
             await client.send_message(message.channel, bot_vars['custom_cmds'][cmd])
 
     if cmd == 'ratelimit' and (cmd == 'py_come' or message.channel.id in bot_vars['allowed_channels']):
@@ -184,6 +184,15 @@ async def on_message(message):
         print("{}{:>20}{:<10}{}{:<15}{}{}".format(time.strftime("%Y-%m-%d %H:%M:%S"), " NON_LISTEN_MSG: ", message.author.name[:10], "| Channel: ", message.channel.name[:15], "| Msg: ", message.content))
 
     natives.save()
+
+
+def check(itera, s):
+    """Idk why I made this"""
+    for i in itera:
+        if i in s:
+            return True
+    return False
+
 
 async def safe_send(channel, message):
     if len(message) < 1990:
