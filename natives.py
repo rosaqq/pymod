@@ -56,7 +56,7 @@ class PycCustom:
             await self.client.send_message(self.message.channel, "Error removing command: Command Not Found")
 
     async def py_customlist(self):
-        await safe_send(self.message.channel, "\n".join(bot_vars['custom_cmds']))
+        await safe_send(self.message.channel, self.client, "\n".join(bot_vars['custom_cmds']))
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -117,7 +117,7 @@ class PycRoot:
 # end of Root class
 
 
-async def safe_send(channel, message):
+async def safe_send(channel, client, message):
     if len(message) < 1990:
         await client.send_message(channel, message)
     else:
