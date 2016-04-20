@@ -108,8 +108,10 @@ async def on_message(message):
 
         for cmd in bot_vars['custom_cmds']:
             #idk what I'm doing anymore
-            if "00 "+cmd == message.content.lower():
+            if "00 " + cmd == message.content.lower():
                 await client.send_message(message.channel, bot_vars['custom_cmds'][cmd])
+            else:
+                pass  # Idk
 
         # # I need this because. Just because.
         # if False:
