@@ -2,7 +2,7 @@
 #
 class RedditMod:
     pass  # FIXME
-#     rank = 0
+    rank = 510
 #     help_dict = {'py_reddit': 'usage: reddit <sub_name>, searches reddit', 'py_r': 'usage: reddit <sub_name>, searches '
 #                                                                                    'reddit, alias for reddit command'}
 #
