@@ -163,7 +163,7 @@ async def on_message(message):
                 helpmsg = []
                 for func in helplist:
                     helpmsg.append(func.replace("py", "00", 1) + ': ' + helplist[func])
-                msg = 'Available commands are: \n' + '\n'.join(helpmsg)
+                msg = 'Available commands are: \n' + '\n'.join(sorted(helpmsg))
                 await safe_send(message.author, msg)
                 await client.send_message(message.channel, "<@" + message.author.id + "> Check your DMs for help")
 

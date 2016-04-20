@@ -56,7 +56,7 @@ class PycCustom:
             await self.client.send_message(self.message.channel, "Error removing command: Command Not Found")
 
     async def py_customlist(self):
-        await safe_send(self.message.channel, self.client, "\n".join([m for m in bot_vars['custom_cmds']]))
+        await safe_send(self.message.channel, self.client, "\n".join(sorted([m for m in bot_vars['custom_cmds']])))
 
 
 # ----------------------------------------------------------------------------------------------------------------------
