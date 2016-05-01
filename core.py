@@ -108,7 +108,7 @@ async def on_message(message):
 
         for command in bot_vars['custom_cmds']:
             #idk what I'm doing anymore
-            if "00 " + command == message.content.lower():
+            if "00 " + command == message.content.lower() and user_rank >= 0:
                 await client.send_message(message.channel, bot_vars['custom_cmds'][command])
 
 
