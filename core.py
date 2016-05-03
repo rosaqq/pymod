@@ -68,6 +68,9 @@ async def on_message(message):
     helplist = {}
 
     if cmd == 'py_come' or cmd == 'py_leave' or message.channel.id in bot_vars['allowed_channels']:
+        if message.content.startswith('py:'):
+            cmd = 'py_dank'
+            args = [message.content.replace('py:', '').replace(':', '')]
         try:
             user_rank = bot_vars['ranks'][message.author.id]
         except KeyError:
