@@ -216,4 +216,4 @@ async def on_ready():
 
 
 
-_thread.start_new_threadclient.run(config['AUTH']['token'])
+client.run(config['AUTH']['token'])
