@@ -8,7 +8,6 @@ import colorlog
 import logging
 import time
 from colored import fg, bg, attr
-import _thread
 
 # Console logging
 # ----------------------------------------------------------------------------------------------------------------------
@@ -215,4 +214,6 @@ async def on_ready():
     print('------')
     bot_vars['start_time'] = time.time()
 
-_thread.start_new_thread(client.run, tuple(config['AUTH']['token']))
+
+
+_thread.start_new_threadclient.run(config['AUTH']['token'])
