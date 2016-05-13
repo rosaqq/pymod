@@ -215,4 +215,4 @@ async def on_ready():
     print('------')
     bot_vars['start_time'] = time.time()
 
-_thread.start_new_thread(client.run, (config['AUTH']['token']))
+_thread.start_new_thread(client.run, tuple(config['AUTH']['token']))
