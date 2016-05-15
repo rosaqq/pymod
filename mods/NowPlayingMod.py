@@ -11,5 +11,5 @@ class NowPlayingMod:
         if status[0].lower() == "none":
             game = None
         else:
-            game = discord.Game(name=' '.join(status))
+            game = discord.Game(name=' '.join(status), type=1)
         await self.client.change_status(game=game)
