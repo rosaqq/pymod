@@ -23,7 +23,7 @@ class PingMod:
             raise Exception("⚠Meme too spicy⚠")
 
     async def py_rtfm(self, tag):
-        await self.client.send_message(self.message.channel, "http://discordpy.readthedocs.io/en/latest/api.html#discord." + tag)
+        await self.client.send_message(self.message.channel, "http://discordpy.rtfd.io/en/latest/api.html#discord." + tag)
 
 
 
