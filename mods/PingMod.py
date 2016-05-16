@@ -3,8 +3,7 @@ import asyncio
 
 class PingMod:
     rank = 0
-    help_dict = {'py_ping': 'try and guess', 'py_doot': '🎺', 'py_chomp': '2meme', 'py_pls': ':/', 'py_bestmod': 'beno',
-                 'py_picklepls': 'pickle, pls', 'py_secondbestmod': 'Ako, duh'}
+    help_dict = {'py_ping': 'try and guess', 'py_doot': '🎺', 'py_chomp': '2meme', 'py_rtfm': 'ghetto discord.py linker'}
 
     def __init__(self, client, message):
         self.client = client
@@ -23,15 +22,9 @@ class PingMod:
         else:
             raise Exception("⚠Meme too spicy⚠")
 
-    async def py_pls(self):
-        await self.client.send_message(self.message.channel, 'Sorry :/')
+    async def py_rtfm(self, tag):
+        await self.client.send_message(self.message.channel, "http://discordpy.readthedocs.io/en/latest/api.html#discord." + tag)
 
-    async def py_bestmod(self):
-        await self.client.send_message(self.message.channel, 'Everyone knows beno is best mod')
 
-    async def py_picklepls(self):
-        await self.client.send_message(self.message.channel, 'https://i.imgur.com/5NX0Wnk.png')
 
-    async def py_secondbestmod(self):
-        await self.client.send_message(self.message.channel, 'Everyone knows Ako is second best mod')
 
