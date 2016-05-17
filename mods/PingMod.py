@@ -22,7 +22,10 @@ class PingMod:
         else:
             raise Exception("⚠Meme too spicy⚠")
 
-    async def py_rtfm(self, tag):
+    async def py_rtfm(self, tag=None):
+        if tag == None:
+            await self.client.send_message(self.message.channel, "http://discordpy.rtfd.io/en/latest/api.html")
+            return
         go = False
         for i in ['on', 'opus', 'utils']:
             if tag.startswith(i):
