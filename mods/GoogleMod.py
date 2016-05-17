@@ -11,12 +11,13 @@ class GoogleMod:
     help_dict = {'py_search': 'search google'}
     global blacklist
     blacklist = __import__('GoogleBlacklistMod').blacklist
+    global key
+    key = config['AUTH']['key']
 
     def __init__(self, client, message):
         self.client = client
         self.message = message
         self.filter = __import__('GoogleBlacklistMod').filter
-        self.key = config['AUTH']['key']
 
     async def py_search(self, *args):
         global blacklist
@@ -25,7 +26,7 @@ class GoogleMod:
                 raise Exception("Search term in blacklist: " + i)
         query = '+'.join(args)
         base = "https://www.googleapis.com/customsearch/v1?cx=006104278528152025374%3Ar7ai6-zcpb4&" \
-               "key={}&q=".format(self.key)
+               "key={}&q=".format(key)
         with request.urlopen(base + query) as r:
             results = json.loads(r.read().decode(r.headers.get_content_charset('utf-8')))
         # res = request.urlopen(base + query)
