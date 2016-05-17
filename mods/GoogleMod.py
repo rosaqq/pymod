@@ -1,5 +1,9 @@
 from urllib import request
 import json
+import configparser
+
+config = configparser.ConfigParser()
+config.read('google.ini')
 
 
 class GoogleMod:
@@ -12,6 +16,7 @@ class GoogleMod:
         self.client = client
         self.message = message
         self.filter = __import__('GoogleBlacklistMod').filter
+        self.key = config['Auth']['key']
 
     async def py_search(self, *args):
         global blacklist
@@ -20,7 +25,7 @@ class GoogleMod:
                 raise Exception("Search term in blacklist: " + i)
         query = '+'.join(args)
         base = "https://www.googleapis.com/customsearch/v1?cx=006104278528152025374%3Ar7ai6-zcpb4&" \
-               "key=AIzaSyANTJTh7HtxQvtPxCSNdNVyRiZWTWqLi94&q="
+               "key={}&q=".format(self.key)
         with request.urlopen(base + query) as r:
             results = json.loads(r.read().decode(r.headers.get_content_charset('utf-8')))
         # res = request.urlopen(base + query)
