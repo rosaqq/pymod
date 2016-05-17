@@ -16,7 +16,7 @@ class GoogleMod:
         self.client = client
         self.message = message
         self.filter = __import__('GoogleBlacklistMod').filter
-        self.key = config['Auth']['key']
+        self.key = config['AUTH']['key']
 
     async def py_search(self, *args):
         global blacklist
