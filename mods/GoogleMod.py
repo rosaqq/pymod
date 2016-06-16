@@ -22,7 +22,7 @@ class GoogleMod:
     async def py_search(self, *args):
         global blacklist
         for i in args:
-            if (i in blacklist) and self.filter:
+            if (i.lower() in blacklist) and self.filter:
                 raise Exception("Search term in blacklist: " + i)
         query = '+'.join(args)
         base = "https://www.googleapis.com/customsearch/v1?cx=006104278528152025374%3Ar7ai6-zcpb4&" \
@@ -36,8 +36,8 @@ class GoogleMod:
             err = False
             errterm = ""
             for i in blacklist:
-                if (i in results["items"][0]["link"] or i in results["items"][0]["link"] or
-                            i in results["items"][0]["snippet"]) and self.filter:
+                if (i in results["items"][0]["link"].lower() or i in results["items"][0]["link"].lower() or
+                            i in results["items"][0]["snippet"].lower()) and self.filter:
                     err = True
                     errterm = i
             if not err:
