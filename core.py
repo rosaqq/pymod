@@ -1,10 +1,10 @@
-import discord
-import sys
-import os
 import configparser
-from types import FunctionType
-import inspect
 import logging
+import os
+import sys
+from types import FunctionType
+import natives
+import discord
 
 # for erm... required init stuff... yes, python mandatory stuff that's it!
 # ----------------------------------------------------------------------------------------------------------------------
@@ -15,9 +15,11 @@ platypus = str(year) + 'y' + str(month) + 'm' + str(day) + 'd' + str(hour) + str
 
 log = logging.getLogger('discord')
 log.setLevel(logging.DEBUG)
-handler = logging.FileHandler(filename=platypus+'.log', encoding='utf-8', mode='w')
+handler = logging.FileHandler(filename=platypus + '.log', encoding='utf-8', mode='w')
 handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
 log.addHandler(handler)
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 
 
@@ -89,7 +91,7 @@ async def on_message(message):
                     helpcmd = True
                     if user_rank >= eval('natives.' + key + '.rank'):
                         for func in bot_vars['natives'][key]:
-                                helplist[func] = eval('natives.' + key + '.help_dict[func]')
+                            helplist[func] = eval('natives.' + key + '.help_dict[func]')
             # check in modules
             for key in bot_vars['cmd_dict']:
                 if cmd in bot_vars['cmd_dict'][key]:
@@ -108,10 +110,10 @@ async def on_message(message):
                 for func in helplist:
                     helpmsg.append(func + ': ' + helplist[func])
                 msg = 'Available commands are: ```\n' + '\n'.join(helpmsg) + '```\nUse $x in the command to pass ' \
-                                                                                 'parameter x to a function that' \
-                                                                                 ' requires it.\n( _ represents a ' \
-                                                                                 'space and "py" should be replaced ' \
-                                                                                 'by the current callsign)'
+                                                                             'parameter x to a function that' \
+                                                                             ' requires it.\n( _ represents a ' \
+                                                                             'space and "py" should be replaced ' \
+                                                                             'by the current callsign)'
                 await client.send_message(message.author, msg)
 
         except Exception as retard:
@@ -129,4 +131,4 @@ async def on_ready():
     print('------')
 
 
-client.run(config['AUTH']['email'], config['AUTH']['pass'])
+client.run(config['AUTH']['token'])
