@@ -1,134 +1,72 @@
 import configparser
-import logging
-import os
-import sys
-from types import FunctionType
-import natives
-import discord
+import random
 
-# for erm... required init stuff... yes, python mandatory stuff that's it!
-# ----------------------------------------------------------------------------------------------------------------------
-import time
+import checks
+from discord.ext import commands
 
-year, month, day, hour, minute, a, b, c, d = time.localtime(time.time())
-platypus = str(year) + 'y' + str(month) + 'm' + str(day) + 'd' + str(hour) + str(minute) + 'h'
-
-log = logging.getLogger('discord')
-log.setLevel(logging.DEBUG)
-handler = logging.FileHandler(filename=platypus + '.log', encoding='utf-8', mode='w')
-handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
-log.addHandler(handler)
-
-
-# ----------------------------------------------------------------------------------------------------------------------
-
-
-# natives loader
-# ----------------------------------------------------------------------------------------------------------------------
-def load_natives():
-    exec("globals()['natives'] = __import__('natives')")
-    bot_vars['natives'] = {}
-    native_classes = [x for x, y in natives.__dict__.items() if 'Pyc' in x]
-    for i in native_classes:
-        funcs = [x for x, y in eval('natives.' + i + '.__dict__.items()') if type(y) == FunctionType and 'py_' in x]
-        bot_vars['natives'][i] = funcs
-
-
-# ----------------------------------------------------------------------------------------------------------------------
-
-
-# module loader
-# ----------------------------------------------------------------------------------------------------------------------
-def load_modules():
-    bot_vars['cmd_dict'] = {}
-    files = os.listdir('mods')
-    sys.path.append('mods')
-    for j in files:
-        if j.endswith('.py'):
-            i = j[0:-3]
-            exec("globals()['" + i + "'] = __import__('" + i + "')." + i)
-            funcs = [x for x, y in eval(i + '.__dict__.items()') if type(y) == FunctionType and 'py_' in x]
-            bot_vars['cmd_dict'][i] = funcs
-
-
-# ----------------------------------------------------------------------------------------------------------------------
-
-print('Connecting to discord servers...')
-
-client = discord.Client()
 config = configparser.ConfigParser()
 config.read("pymod.ini")
-load_natives()
-load_modules()
-print('bot_vars pre-set to: ' + str(bot_vars))
+
+pymod = commands.Bot(command_prefix='py ', description='hello, I am a potato', pm_help=True)
+ranks = {config['GENERAL']['adminID']: '512', config['GENERAL']['adminID2']: '512'}
 
 
-@client.event
-async def on_message(message):
-    cmd, args = natives.parse(message)
-    helpcmd = False
-    helplist = {}
-
-    if cmd == 'py_come' or cmd == 'py_leave' or message.channel.id in bot_vars['allowed_channels']:
-        if message.content.startswith('py:'):
-            cmd = 'py_dank'
-            args = [message.content.replace('py:', '').replace(':', '')]
-        try:
-            user_rank = bot_vars['ranks'][message.author.id]
-        except KeyError:
-            user_rank = 0
-
-        try:
-            # check if cmd in natives
-            for key in bot_vars['natives']:
-                if cmd in bot_vars['natives'][key]:
-                    if user_rank >= eval('natives.' + key + '.rank'):
-                        exec('a = natives.' + key + '(client, message)')
-                        await eval('a.' + cmd + '(*args)')
-                    else:
-                        await client.send_message(message.channel, 'permission denied')
-                elif cmd == 'py_help':
-                    helpcmd = True
-                    if user_rank >= eval('natives.' + key + '.rank'):
-                        for func in bot_vars['natives'][key]:
-                            helplist[func] = eval('natives.' + key + '.help_dict[func]')
-            # check in modules
-            for key in bot_vars['cmd_dict']:
-                if cmd in bot_vars['cmd_dict'][key]:
-                    if user_rank >= eval(key + '.rank'):
-                        exec('a = ' + key + '(client, message)')
-                        await eval('a.' + cmd + '(*args)')
-                    else:
-                        await client.send_message(message.channel, 'permission denied')
-                elif cmd == 'py_help':
-                    helpcmd = True
-                    if user_rank >= eval(key + '.rank'):
-                        for func in bot_vars['cmd_dict'][key]:
-                            helplist[func] = helplist[func] = eval(key + '.help_dict[func]')
-            if helpcmd:
-                helpmsg = []
-                for func in helplist:
-                    helpmsg.append(func + ': ' + helplist[func])
-                msg = 'Available commands are: ```\n' + '\n'.join(helpmsg) + '```\nUse $x in the command to pass ' \
-                                                                             'parameter x to a function that' \
-                                                                             ' requires it.\n( _ represents a ' \
-                                                                             'space and "py" should be replaced ' \
-                                                                             'by the current callsign)'
-                await client.send_message(message.author, msg)
-
-        except Exception as retard:
-            msg = 'Something went wrong:\n' + str(retard)
-            await client.send_message(message.channel, msg)
-
-    natives.save()
+@pymod.event
+async def on_command_error(error, ctx):
+    if isinstance(error, commands.CommandError) and ctx.message.channel in checks.allowed_channels:
+        await pymod.send_message(ctx.message.channel, 'permission denied')
 
 
-@client.event
+@pymod.event
 async def on_ready():
     print('Logged in as')
-    print(client.user.name)
-    print(client.user.id)
+    print(pymod.user.name)
+    print(pymod.user.id)
     print('------')
 
 
-client.run(config['AUTH']['token'])
+@pymod.command(pass_context=True)
+@checks.is_admin()
+async def come(ctx):
+    checks.allowed_channels.append(ctx.message.channel.id)
+    await pymod.say('here')
+
+
+@pymod.command(pass_context=True)
+@checks.is_admin()
+async def leave(ctx):
+    checks.allowed_channels.remove(ctx.message.channel.id)
+    await pymod.say('left')
+
+
+@pymod.command()
+@checks.in_channel()
+async def add(int1: int, int2: int):
+    """[int1] [int2]"""
+    await pymod.say(int1 + int2)
+
+
+@pymod.command()
+@checks.in_channel()
+async def roll(dice: str):
+    """dice = [times]d[die size]
+    example: 5d6 = roll 5 6-dice"""
+    try:
+        rolls, limit = map(int, dice.split('d'))
+    except Exception:
+        await pymod.say('Format has to be in NdN!')
+        return
+
+    result = ', '.join(str(random.randint(1, limit)) for r in range(rolls))
+    await pymod.say(result)
+
+
+@pymod.command()
+@checks.in_channel()
+async def choose(*choices: str):
+    """choices = [option1] [option2] [etc]
+    example: py choose dinner bath me"""
+    await pymod.say(random.choice(choices))
+
+
+pymod.run(config['AUTH']['token'])
