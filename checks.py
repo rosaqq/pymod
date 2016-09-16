@@ -10,7 +10,7 @@ allowed_channels = []
 
 def is_admin():
     def predicate(ctx):
-        return ctx.message.author.id == config['GENERAL']['adminID'] or config['GENERAL']['adminID2']
+        return ctx.message.author.id == config['GENERAL']['adminID'] or ctx.message.author.id == config['GENERAL']['adminID2']
     return commands.check(predicate)
 
 
