@@ -1,8 +1,8 @@
 *.ini
-*.pyc
 *.log
 .idea
 bot_vars.pickle
 __pycache__/
 cookies/
 memes/
+test.py
