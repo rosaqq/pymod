@@ -1,3 +1,3 @@
 # pymod
-python bot under development  
+modular python bot under development  
 requires [discord.py](https://github.com/Rapptz/discord.py/tree/async)
