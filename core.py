@@ -112,6 +112,20 @@ async def py_callme(message, callsign):
 async def py_botvars(message):
     await client.send_message(message.channel, bot_vars)
 
+
+async def py_eval(message, *args):
+    try:
+        await client.send_message(message.channel, '```' + str(eval(' '.join(args))) + '```')
+    except Exception as lol:
+        await client.send_message(message.channel, lol)
+
+
+async def py_aeval(message, *args):
+    try:
+        await eval(' '.join(args))
+    except Exception as lol:
+        await client.send_message(message.channel, lol)
+
 # ----------------------------------------------------------------------------------------------------------------------
 load()
 load_modules()
@@ -130,7 +144,8 @@ async def on_ready():
 async def on_message(message):
     cmd, args = parse(message)
     helplist = {}
-    base_cmds = ['py_come', 'py_leave', 'py_callme', 'py_botvars']
+    helpcmd = False
+    base_cmds = ['py_come', 'py_leave', 'py_callme', 'py_botvars', 'py_eval', 'py_aeval']
 
     if cmd in base_cmds and message.author.id in bot_vars['ranks']:
         try:
@@ -146,6 +161,9 @@ async def on_message(message):
         except KeyError:
             user_rank = 0
 
+        if cmd == 'py_help':
+            helpcmd = True
+
         try:
             # check in modules
             for key in bot_vars['cmd_dict']:
@@ -156,17 +174,19 @@ async def on_message(message):
                         exec('del a')
                     else:
                         await client.send_message(message.channel, 'permission denied')
-                elif cmd == 'py_help':
+                elif helpcmd:
                     if user_rank >= eval(key + '.rank'):
                         for func in bot_vars['cmd_dict'][key]:
-                            helplist[func] = helplist[func] = eval(key + '.help_dict[func]')
+                            helplist[func] = eval(key + '.help_dict[func]')
                     helpmsg = []
                     for func in helplist:
                         helpmsg.append(func + ': ' + helplist[func])
-                    msg = 'Available commands are: ```\n' + '\n'.join(helpmsg) + '```\n( _ represents a ' \
-                                                                                 'space and "py" should be replaced ' \
-                                                                                 'by the current callsign)'
-                    await client.send_message(message.author, msg)
+
+            if helpcmd:
+                msg = 'Available commands are: ```\n' + '\n'.join(helpmsg) + '```\n( _ represents a ' \
+                                                                             'space and "py" should be replaced ' \
+                                                                             'by the current callsign)'
+                await client.send_message(message.author, msg)
 
         except Exception as retard:
             msg = 'Something went wrong:\n' + str(retard)
