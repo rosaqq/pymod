@@ -34,13 +34,17 @@ def load():
     except IOError:
         admin1, admin2 = config['GENERAL']['adminID'], config['GENERAL']['adminID2']
         bot_vars = {'ranks': {admin1: 512, admin2: 512}, 'allowed_channels': [],
-                    'cmd_dict': {}, 'callsign': {'default': 'py'}}
+                    'cmd_dict': {}, 'callsign': {'default': 'py'},
+                    'base_cmds': {'py_come': 128, 'py_leave': 128, 'py_callme': 512, 'py_botvars': 512,
+                                  'py_eval': 512, 'py_aeval': 512, 'py_exec': 512, 'py_help': 0}}
         save()
 
 
 def reset():
     os.remove('bot_vars.pickle')
     load()
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 
 
@@ -68,7 +72,7 @@ def load_modules():
 def parse(message):
     try:
         server_callsign = bot_vars['callsign'][str(message.server.id)]
-    except KeyError:
+    except (KeyError, AttributeError):
         server_callsign = bot_vars['callsign']['default']
 
     if message.content.startswith(server_callsign):
@@ -81,12 +85,15 @@ def parse(message):
         return cmd, args
     else:
         return 'wrong_callsign', []
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 
 
 # base commands
 # ----------------------------------------------------------------------------------------------------------------------
 async def py_come(message):
+    """Enable bot in the current channel."""
     if message.channel.id in bot_vars['allowed_channels']:
         await client.send_message(message.channel, 'channel already enabled')
     else:
@@ -94,7 +101,9 @@ async def py_come(message):
         await client.send_message(message.channel, 'channel enabled')
     save()
 
+
 async def py_leave(message):
+    """Disable bot in the current channel."""
     if message.channel.id in bot_vars['allowed_channels']:
         bot_vars['allowed_channels'].remove(message.channel.id)
         await client.send_message(message.channel, 'channel disabled')
@@ -102,18 +111,27 @@ async def py_leave(message):
         await client.send_message(message.channel, 'channel already disabled')
     save()
 
+
 async def py_callme(message, callsign):
-    bot_vars['callsign'][str(message.server.id)] = str(callsign)
-    name = 'pymod (' + str(callsign) + ')'
-    await client.change_nickname(message.server.me, name)
-    await client.send_message(message.channel, 'new callsign: ' + str(callsign))
-    save()
+    """Change the bot callsign; usage example: py callme <new_callsign>
+    Not available on private message interaction."""
+    if message.server is not None:
+        bot_vars['callsign'][str(message.server.id)] = str(callsign)
+        name = 'pymod (' + str(callsign) + ')'
+        await client.change_nickname(message.server.me, name)
+        await client.send_message(message.channel, 'new callsign: ' + str(callsign))
+        save()
+    else:
+        await client.send_message(message.channel, 'Command not supported in a private channel.')
+
 
 async def py_botvars(message):
+    """Prints the current botvars, a python dictionary pymod uses to store it's variables."""
     await client.send_message(message.channel, bot_vars)
 
 
 async def py_eval(message, *args):
+    """Evaluates an expression; usage example: py eval 5+5"""
     try:
         await client.send_message(message.channel, '```' + str(eval(' '.join(args))) + '```')
     except Exception as lol:
@@ -121,12 +139,62 @@ async def py_eval(message, *args):
 
 
 async def py_aeval(message, *args):
+    """Same as eval, but for when the expression passed in evaluates to a coroutine."""
     try:
         await eval(' '.join(args))
     except Exception as lol:
         await client.send_message(message.channel, lol)
 
+
+async def py_exec(message, *args):
+    """Interprets args as python code"""
+    try:
+        code = ' '.join(args)
+        print(str(message.timestamp) + ' [' + message.author.name +
+              '] executed:\n--------------------------------\n' + code +
+              '\n--------------------------------\nwith output:')
+        exec(code)
+        print('\n')
+        await client.send_message(message.channel, 'code executed')
+    except Exception as lol:
+        await client.send_message(message.channel, lol)
+
+
+async def py_help(message):
+    """Prints this message."""
+
+    helplist = {}
+    user_rank = get_rank(message)
+
+    for func in bot_vars['base_cmds']:
+        if user_rank >= bot_vars['base_cmds'][func]:
+            helplist[func] = eval(func + '.__doc__')
+
+    for key in bot_vars['cmd_dict']:
+        if user_rank >= eval(key + '.rank'):
+            for func in bot_vars['cmd_dict'][key]:
+                helplist[func] = eval(key + '.help_dict[func]')
+
+    help_array = []
+    for func in helplist:
+        help_array.append('#' + func + ':\n\t' + helplist[func])
+
+    msg = 'Available commands are: ```Markdown\n' + '\n'.join(help_array) + '```\n( _ represents a ' \
+                                                                            'space and "py" should be replaced ' \
+                                                                            'by the current callsign)'
+    return await client.send_message(message.author, msg)
+
+
 # ----------------------------------------------------------------------------------------------------------------------
+
+
+def get_rank(message):
+    if message.author.id in bot_vars['ranks']:
+        return bot_vars['ranks'][message.author.id]
+    else:
+        return 0
+
+
 load()
 load_modules()
 print('bot_vars pre-set to: ' + str(bot_vars))
@@ -143,11 +211,10 @@ async def on_ready():
 @client.event
 async def on_message(message):
     cmd, args = parse(message)
-    helplist = {}
-    helpcmd = False
-    base_cmds = ['py_come', 'py_leave', 'py_callme', 'py_botvars', 'py_eval', 'py_aeval']
+    user_rank = get_rank(message)
 
-    if cmd in base_cmds and message.author.id in bot_vars['ranks']:
+    if cmd in bot_vars['base_cmds'] and user_rank >= bot_vars['base_cmds'][cmd]:
+
         try:
             await eval(cmd + '(message, *args)')
         except Exception as fail:
@@ -155,14 +222,6 @@ async def on_message(message):
             await client.send_message(message.channel, msg)
 
     elif message.channel.id in bot_vars['allowed_channels']:
-
-        try:
-            user_rank = bot_vars['ranks'][message.author.id]
-        except KeyError:
-            user_rank = 0
-
-        if cmd == 'py_help':
-            helpcmd = True
 
         try:
             # check in modules
@@ -174,19 +233,6 @@ async def on_message(message):
                         exec('del a')
                     else:
                         await client.send_message(message.channel, 'permission denied')
-                elif helpcmd:
-                    if user_rank >= eval(key + '.rank'):
-                        for func in bot_vars['cmd_dict'][key]:
-                            helplist[func] = eval(key + '.help_dict[func]')
-                    helpmsg = []
-                    for func in helplist:
-                        helpmsg.append(func + ': ' + helplist[func])
-
-            if helpcmd:
-                msg = 'Available commands are: ```\n' + '\n'.join(helpmsg) + '```\n( _ represents a ' \
-                                                                             'space and "py" should be replaced ' \
-                                                                             'by the current callsign)'
-                await client.send_message(message.author, msg)
 
         except Exception as retard:
             msg = 'Something went wrong:\n' + str(retard)
