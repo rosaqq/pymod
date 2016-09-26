@@ -14,6 +14,6 @@ The idea behind pymod for it to be a generic bot that allows the user to easily 
 
 TODO:  
 - [ ] Make help command completely docstring based;
-- [ ] Get rid of the triple-quoted voice bot & turn it into a voice module;
+- [x] Get rid of the triple-quoted voice bot & turn it into a voice module;
 - [ ] Make sure pymod taking complete advantage of the asynchronous marvel;
 - [ ] Alias support for private messages?
