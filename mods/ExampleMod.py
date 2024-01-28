@@ -8,4 +8,4 @@ class ExampleMod:
         self.message = message
 
     async def py_exmod(self):
-        await self.client.send_message(self.message.channel, 'Thanks for using the example module. That\'s all.')
+        await self.message.channel.send('Thanks for using the example module. That\'s all.')
