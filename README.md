@@ -17,3 +17,12 @@ TODO:
 - [x] Get rid of the triple-quoted voice bot & turn it into a voice module;
 - [ ] Make sure pymod taking complete advantage of the asynchronous marvel;
 - [ ] Alias support for private messages?
+
+Requires pymod.ini file locally - example:
+```
+[GENERAL]
+adminID     = 999
+adminID2    = 998
+[AUTH]
+token = ...
+```
