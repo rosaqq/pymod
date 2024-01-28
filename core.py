@@ -1,17 +1,16 @@
 import configparser
 import os
+import sys
 import pickle
-import random
 from types import FunctionType
 
 import discord
-import sys
 
-from discord.ext import commands
+# todo: read up on what the frick intents are
+intents = discord.Intents.default()
+intents.message_content = True
+client = discord.Client(intents=intents)
 
-import checks
-
-client = discord.Client()
 config = configparser.ConfigParser()
 config.read('pymod.ini')
 bot_vars = {}
@@ -32,11 +31,17 @@ def load():
             bot_vars = pickle.load(save_file)
             save_file.close()
     except IOError:
-        admin1, admin2 = config['GENERAL']['adminID'], config['GENERAL']['adminID2']
-        bot_vars = {'ranks': {admin1: 512, admin2: 512}, 'allowed_channels': [],
-                    'cmd_dict': {}, 'callsign': {'default': 'py'},
-                    'base_cmds': {'py_come': 128, 'py_leave': 128, 'py_callme': 512, 'py_botvars': 512,
-                                  'py_eval': 512, 'py_aeval': 512, 'py_exec': 512, 'py_help': 0}}
+        admin1, admin2 = int(config['GENERAL']['adminID']), int(config['GENERAL']['adminID2'])
+        bot_vars = {
+            'ranks': {admin1: 512, admin2: 512}, 'allowed_channels': [],
+            'cmd_dict': {}, 'callsign': {'default': 'py'},
+            'base_cmds': {
+                'py_come': 128, 'py_leave': 128, 'py_callme': 512, 'py_startclean': 128, 'py_stopclean': 128,
+                'py_botvars': 512, 'py_eval': 512, 'py_aeval': 512, 'py_exec': 512, 'py_help': 0
+            },
+            'autoclean_user_id': int(config['GENERAL']['autoclean_user_id']),
+            'autoclean': 1
+        }
         save()
 
 
@@ -84,7 +89,7 @@ def parse(message):
                 args[args.index(asd)].replace('\\n', '\n').replace('\\t', '\t').replace('\\s', '\u0020')
         return cmd, args
     else:
-        return 'wrong_callsign', []
+        return '', []
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -95,10 +100,10 @@ def parse(message):
 async def py_come(message):
     """Enable bot in the current channel."""
     if message.channel.id in bot_vars['allowed_channels']:
-        await client.send_message(message.channel, 'channel already enabled')
+        await message.channel.send('channel already enabled')
     else:
         bot_vars['allowed_channels'].append(message.channel.id)
-        await client.send_message(message.channel, 'channel enabled')
+        await message.channel.send('channel enabled')
     save()
 
 
@@ -106,9 +111,9 @@ async def py_leave(message):
     """Disable bot in the current channel."""
     if message.channel.id in bot_vars['allowed_channels']:
         bot_vars['allowed_channels'].remove(message.channel.id)
-        await client.send_message(message.channel, 'channel disabled')
+        await message.channel.send('channel disabled')
     else:
-        await client.send_message(message.channel, 'channel already disabled')
+        await message.channel.send('channel already disabled')
     save()
 
 
@@ -118,24 +123,36 @@ async def py_callme(message, callsign):
     if message.server is not None:
         bot_vars['callsign'][str(message.server.id)] = str(callsign)
         name = 'pymod (' + str(callsign) + ')'
-        await client.change_nickname(message.server.me, name)
-        await client.send_message(message.channel, 'new callsign: ' + str(callsign))
+        await message.server.me.edit(nick=name)
+        await message.channel.send('new callsign: ' + str(callsign))
         save()
     else:
-        await client.send_message(message.channel, 'Command not supported in a private channel.')
+        await message.channel.send('Command not supported in a private channel.')
+
+
+async def py_startclean(message):
+    """Toggle on auto clean msgs"""
+    bot_vars['autoclean'] = 1
+    await message.channel.send('Autoclean is ' + str(bot_vars['autoclean']))
+
+
+async def py_stopclean(message):
+    """Toggle off auto clean"""
+    bot_vars['autoclean'] = 0
+    await message.channel.send('Autoclean is ' + str(bot_vars['autoclean']))
 
 
 async def py_botvars(message):
-    """Prints the current botvars, a python dictionary pymod uses to store it's variables."""
-    await client.send_message(message.channel, bot_vars)
+    """Prints the current botvars, a python dictionary pymod uses to store its variables."""
+    await message.channel.send(bot_vars)
 
 
 async def py_eval(message, *args):
     """Evaluates an expression; usage example: py eval 5+5"""
     try:
-        await client.send_message(message.channel, '```' + str(eval(' '.join(args))) + '```')
+        await message.channel.send('```' + str(eval(' '.join(args))) + '```')
     except Exception as lol:
-        await client.send_message(message.channel, lol)
+        await message.channel.send(lol)
 
 
 async def py_aeval(message, *args):
@@ -143,7 +160,7 @@ async def py_aeval(message, *args):
     try:
         await eval(' '.join(args))
     except Exception as lol:
-        await client.send_message(message.channel, lol)
+        await message.channel.send(lol)
 
 
 async def py_exec(message, *args):
@@ -155,9 +172,9 @@ async def py_exec(message, *args):
               '\n--------------------------------\nwith output:')
         exec(code)
         print('\n')
-        await client.send_message(message.channel, 'code executed')
+        await message.channel.send('code executed')
     except Exception as lol:
-        await client.send_message(message.channel, lol)
+        await message.channel.send(lol)
 
 
 async def py_help(message):
@@ -177,12 +194,11 @@ async def py_help(message):
 
     help_array = []
     for func in helplist:
-        help_array.append('#' + func + ':\n\t' + helplist[func])
+        help_array.append('#' + func.replace('_', ' ') + '\n\t' + helplist[func] + '\n')
 
-    msg = 'Available commands are: ```Markdown\n' + '\n'.join(help_array) + '```\n( _ represents a ' \
-                                                                            'space and "py" should be replaced ' \
-                                                                            'by the current callsign)'
-    return await client.send_message(message.author, msg)
+    msg = 'Available commands are: ```md\n' + '\n'.join(help_array) + '```\n("#py" should be replaced ' \
+                                                                      'by the current callsign)'
+    return await message.author.send(msg)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -208,35 +224,57 @@ async def on_ready():
     print('------')
 
 
+# Used in on_message to keep track of potential bot triggers
+last_bot_trigger: discord.Message
+
+
 @client.event
 async def on_message(message):
     cmd, args = parse(message)
     user_rank = get_rank(message)
 
-    if cmd in bot_vars['base_cmds'] and user_rank >= bot_vars['base_cmds'][cmd]:
+    # Save a message if it looks like a bot trigger
+    # (Bot replies do not start with these chars, so they won't overwrite)
+    global last_bot_trigger
+    if message.content[0] in ['.', '!', '-']:
+        last_bot_trigger = message
 
-        try:
-            await eval(cmd + '(message, *args)')
-        except Exception as fail:
-            msg = 'Something went wrong:\n' + str(fail)
-            await client.send_message(message.channel, msg)
+    # NO CALL SIGN
+    if not cmd:
+        # If autoclean is on, always work in any channel
+        if bot_vars['autoclean'] and message.author.id == bot_vars['autoclean_user_id']:
+            await message.delete()
 
-    elif message.channel.id in bot_vars['allowed_channels']:
+            # also delete trigger message
+            if last_bot_trigger is not None:
+                await last_bot_trigger.delete()
 
-        try:
-            # check in modules
-            for key in bot_vars['cmd_dict']:
-                if cmd in bot_vars['cmd_dict'][key]:
-                    if user_rank >= eval(key + '.rank'):
-                        exec('a = ' + key + '(client, message)')
-                        await eval('a.' + cmd + '(*args)')
-                        exec('del a')
-                    else:
-                        await client.send_message(message.channel, 'permission denied')
+    # CALL SIGN WAS USED
+    else:
+        if cmd in bot_vars['base_cmds'] and user_rank >= bot_vars['base_cmds'][cmd]:
 
-        except Exception as retard:
-            msg = 'Something went wrong:\n' + str(retard)
-            await client.send_message(message.channel, msg)
+            try:
+                await eval(cmd + '(message, *args)')
+            except Exception as fail:
+                msg = 'Something went wrong:\n' + str(fail)
+                await message.channel.send(msg)
+
+        elif message.channel.id in bot_vars['allowed_channels']:
+
+            try:
+                # check in modules
+                for key in bot_vars['cmd_dict']:
+                    if cmd in bot_vars['cmd_dict'][key]:
+                        if user_rank >= eval(key + '.rank'):
+                            exec('a = ' + key + '(client, message)')
+                            await eval('a.' + cmd + '(*args)')
+                            exec('del a')
+                        else:
+                            await message.channel.send('permission denied')
+
+            except Exception as retard:
+                msg = 'Something went wrong:\n' + str(retard)
+                await message.channel.send(msg)
 
 
 client.run(config['AUTH']['token'])
